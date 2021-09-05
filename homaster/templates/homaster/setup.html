@@ -1,4 +1,28 @@
-<form method="post">{% csrf_token %}
-    {{ form.as_p }}
-    <input type="submit" value="Send message">
+<!DOCTYPE html>
+<html lang="ja">
+
+<!-- ヘッダ -->
+<head>
+  <meta charset="UTF-8">
+  <title>ENGAWAの設定</title>
+</head>
+
+<!-- 本文 -->
+<body>
+  <div style="margin:auto; width: 80%;">
+　　<div style="text-align:center;">
+      <h1>作成するPC、NPC、HOの数を入力</h1>
+　　</div>
+　　<div>
+      <form method="post">{% csrf_token %}
+        <table>
+          {{ form.as_table }}
+        </table>
+    </div>
+    <div style="text-align:right; padding: 0px 30px 0px 0px;">
+        <input type="submit" value="作成する">
+    </div>
+  </div>
 </form>
+</body>
+</html>
