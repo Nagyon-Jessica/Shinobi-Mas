@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head></head>
+<body>
+  <!-- object_list は Article.objects.all() と同じ結果となる -->
+  ENGAWA!!!<br>
+  {% if object_list %}
+  {% for handout in object_list %}
+  <li>{{ handout.id }}</li>
+  <li>{{ handout.type }}</li>
+  {% endfor %}
+  {% endif %}
+</body>
+</html>
