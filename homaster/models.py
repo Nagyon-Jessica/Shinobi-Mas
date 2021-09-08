@@ -15,11 +15,12 @@ class Handout(models.Model):
 
 class Player(models.Model):
     engawa = models.ForeignKey(Engawa, on_delete=models.CASCADE)
-    invitation_code = models.CharField(max_length=8)
+    p_code = models.CharField(max_length=8)
+    gm_flag = models.BooleanField()
 
     class Meta:
         indexes = [
-            models.Index(fields=['engawa', 'invitation_code'])
+            models.Index(fields=['engawa', 'p_code'])
         ]
 
 class Auth(models.Model):
