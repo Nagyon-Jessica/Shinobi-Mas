@@ -1,15 +1,25 @@
 <!DOCTYPE html>
 <html>
-<head></head>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ scenario_name }} - Shinobi-Mas</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css">
+  <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+</head>
 <body>
   <!-- object_list は Article.objects.all() と同じ結果となる -->
   あなたは{{ role_name }}です<br>
-  シナリオ名：{{ scenario_name }}<br>
+  シナリオ名：{{ scenario_name }}
+  <button type="button" class="button">ENGAWAを削除する</button>
   {% if object_list %}
   {% for handout in object_list %}
   <li>{{ handout.id }}</li>
   <li>{{ handout.type }}</li>
   {% endfor %}
   {% endif %}
+  <div>
+    <a class="button">ハンドアウトを追加する</a>
+  </div>
 </body>
 </html>
