@@ -7,14 +7,15 @@ class Engawa(models.Model):
 class Handout(models.Model):
     engawa = models.ForeignKey(Engawa, on_delete=models.CASCADE, db_index=True)
     type = models.PositiveSmallIntegerField()
-    pc_name = models.CharField(max_length=255, blank=True)
-    pl_name = models.CharField(max_length=255, blank=True)
-    front = models.CharField(max_length=1023, blank=True)
-    back = models.CharField(max_length=1023, blank=True)
-    invitation_code = models.CharField(max_length=8, blank=True)
+    pc_name = models.CharField(max_length=255, null=True, blank=True)
+    pl_name = models.CharField(max_length=255, null=True, blank=True)
+    front = models.CharField(max_length=1023, null=True, blank=True)
+    back = models.CharField(max_length=1023, null=True, blank=True)
+    invitation_code = models.CharField(max_length=8, null=True, blank=True)
 
 class Player(models.Model):
     engawa = models.ForeignKey(Engawa, on_delete=models.CASCADE)
+    handout = models.OneToOneField(Handout, on_delete=models.CASCADE, null=True, blank=True)
     p_code = models.CharField(max_length=8)
     gm_flag = models.BooleanField()
 
