@@ -1,4 +1,5 @@
 import uuid, random, string
+from django.http import Http404
 from django.shortcuts import redirect
 from django.views.generic import TemplateView, ListView
 from django.views.generic.edit import FormView
@@ -26,3 +27,38 @@ class IndexView(TemplateView):
 class EngawaView(ListView):
     template_name = 'homaster/engawa.html'
     model = Handout
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["scenario_name"] = self.engawa.scenario_name
+        # プレイヤーのロール名(GM/PCx)を判定
+        if self.player.gm_flag:
+            context["role_name"] = "GM"
+        else:
+            # ENGAWAに所属するplayerのリスト
+            players = Player.objects.filter(engawa=self.engawa).order_by("id")
+            pl_num = players.index(self.player) + 1
+            context['role_name'] = f"PC{pl_num}"
+        return context
+
+    def get(self, *args, **kwargs):
+        # uuidかp_codeが不正な値の場合はトップページにリダイレクト
+        uuid = kwargs['uuid']
+        p_code = kwargs['p_code']
+        print(p_code)
+        try:
+            engawa = Engawa.objects.get(uuid=uuid)
+        except Engawa.DoesNotExist:
+            engawa = None
+        try:
+            player = Player.objects.get(engawa=engawa, p_code=p_code)
+        except Player.DoesNotExist:
+            player = None
+
+        if not (engawa and player):
+            return redirect('index')
+
+        self.engawa = engawa
+        self.player = player
+
+        return super().get(*args, **kwargs)

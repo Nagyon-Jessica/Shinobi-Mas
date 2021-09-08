@@ -3,7 +3,8 @@
 <head></head>
 <body>
   <!-- object_list は Article.objects.all() と同じ結果となる -->
-  ENGAWA!!!<br>
+  あなたは{{ role_name }}です<br>
+  シナリオ名：{{ scenario_name }}<br>
   {% if object_list %}
   {% for handout in object_list %}
   <li>{{ handout.id }}</li>
