@@ -1,16 +1,17 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{{ scenario_name }} - Shinobi-Mas</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css">
-  <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+  <title>{{ engawa.scenario_name }} - Shinobi-Mas</title>
+  <link rel="stylesheet" href="{% static 'assets/css/bootstrap.css' %}">
 </head>
 <body>
-  <!-- object_list は Article.objects.all() と同じ結果となる -->
+  <script src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
+  <script src="{% static 'assets/js/bootstrap.js' %}"></script>
+  <script src="{% static 'js/jquery.bootstrap.modal.forms.js' %}"></script>
   あなたは{{ role_name }}です<br>
-  シナリオ名：{{ scenario_name }}
+  シナリオ名：{{ engawa.scenario_name }}
   <button type="button" class="button">ENGAWAを削除する</button>
   {% if object_list %}
   {% for handout in object_list %}
@@ -18,8 +19,22 @@
   <li>{{ handout.type }}</li>
   {% endfor %}
   {% endif %}
+  <div class="modal fade" tabindex="-1" role="dialog" id="modal">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content"></div>
+    </div>
+  </div>
   <div>
-    <a class="button">ハンドアウトを追加する</a>
+    <button id="create-handout" class="btn" type="button">ハンドアウトを追加する</button>
   </div>
 </body>
+<script type="text/javascript">
+  $(document).ready(function() {
+
+    $("#create-handout").modalForm({
+        formURL: "{% url 'create-handout' engawa.uuid player.p_code %}"
+    });
+
+  });
+</script>
 </html>

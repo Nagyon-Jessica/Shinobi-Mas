@@ -2,8 +2,10 @@ import uuid, random, string
 from django.http import Http404
 from django.shortcuts import redirect
 from django.views.generic import TemplateView, ListView
-from django.views.generic.edit import FormView
+from django.views.generic.edit import CreateView
+from bootstrap_modal_forms.generic import BSModalFormView
 from .models import *
+from .forms import *
 
 class IndexView(TemplateView):
     template_name = 'homaster/index.html'
@@ -30,7 +32,8 @@ class EngawaView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["scenario_name"] = self.engawa.scenario_name
+        context["engawa"] = self.engawa
+        context['player'] = self.player
         # プレイヤーのロール名(GM/PCx)を判定
         if self.player.gm_flag:
             context["role_name"] = "GM"
@@ -45,7 +48,6 @@ class EngawaView(ListView):
         # uuidかp_codeが不正な値の場合はトップページにリダイレクト
         uuid = kwargs['uuid']
         p_code = kwargs['p_code']
-        print(p_code)
         try:
             engawa = Engawa.objects.get(uuid=uuid)
         except Engawa.DoesNotExist:
@@ -62,3 +64,12 @@ class EngawaView(ListView):
         self.player = player
 
         return super().get(*args, **kwargs)
+
+class CreateHandoutView(CreateView):
+    template_name = 'homaster/create.html'
+    model = Handout
+    fields = ['type', 'pc_name', 'pl_name', 'front', 'back']
+
+class HandoutTypeChoiceView(BSModalFormView):
+    template_name = 'homaster/type_choice_modal.html'
+    form_class = HandoutTypeForm
