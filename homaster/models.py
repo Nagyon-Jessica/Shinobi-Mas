@@ -1,4 +1,8 @@
 from django.db import models
+from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
+
+class MyManager(BaseUserManager):
+    pass
 
 class Engawa(models.Model):
     uuid = models.CharField(max_length=36, primary_key=True)
@@ -13,11 +17,13 @@ class Handout(models.Model):
     back = models.CharField(max_length=1023, null=True, blank=True)
     invitation_code = models.CharField(max_length=8, null=True, blank=True)
 
-class Player(models.Model):
+class Player(AbstractBaseUser):
     engawa = models.ForeignKey(Engawa, on_delete=models.CASCADE)
     handout = models.OneToOneField(Handout, on_delete=models.CASCADE, null=True, blank=True)
     p_code = models.CharField(max_length=8)
     gm_flag = models.BooleanField()
+
+    USERNAME_FIELD = 'id'
 
     class Meta:
         indexes = [

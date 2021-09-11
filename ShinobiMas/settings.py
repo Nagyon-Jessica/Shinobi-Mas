@@ -29,6 +29,8 @@ ALLOWED_HOSTS = []
 
 # Application definition
 
+AUTHENTICATION_BACKENDS = ['homaster.backends.PlayerAuthBackend']
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -37,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'bootstrap_modal_forms',
-    'homaster'
+    'homaster',
 ]
 
 MIDDLEWARE = [
@@ -81,6 +83,10 @@ DATABASES = {
     }
 }
 
+# CustomUser
+AUTH_USER_MODEL = "homaster.Player"
+
+LOGIN_URL = "index"
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
