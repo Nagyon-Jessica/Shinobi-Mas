@@ -15,7 +15,7 @@ class Handout(models.Model):
     pl_name = models.CharField(verbose_name="PL名", max_length=100, null=True, blank=True)
     front = models.TextField(verbose_name="使命(表)", max_length=1000, null=True, blank=True)
     back = models.TextField(verbose_name="秘密(裏)", max_length=1000, null=True, blank=True)
-    invitation_code = models.CharField(max_length=8, null=True, blank=True)
+    p_code = models.CharField(max_length=8, null=True, blank=True)
 
 class Player(AbstractBaseUser):
     engawa = models.ForeignKey(Engawa, on_delete=models.CASCADE)

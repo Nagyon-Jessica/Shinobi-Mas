@@ -1,5 +1,5 @@
 import uuid, random, string
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.http import Http404
 from django.http.response import HttpResponseRedirect
 from django.forms import fields
@@ -17,7 +17,7 @@ def signin(request, **kwargs):
     if "p_code" in request.GET:
         p_code = request.GET.get("p_code")
     else:
-        return HttpResponseRedirect('homaster:index')
+        return HttpResponseRedirect('index')
 
     # アクセスユーザの存在確認
     player = authenticate(request, uuid=kwargs['uuid'], p_code=p_code)
@@ -27,9 +27,9 @@ def signin(request, **kwargs):
         request.user = player
     else:
         # ユーザが存在しなければトップページへリダイレクト
-        return HttpResponseRedirect('homaster:index')
+        return HttpResponseRedirect('index')
     # ハンドアウト一覧画面へ遷移
-    return HttpResponseRedirect('homaster:engawa')
+    return HttpResponseRedirect('engawa')
 
 class IndexView(TemplateView):
     template_name = 'homaster/index.html'
@@ -79,7 +79,8 @@ class EngawaView(LoginRequiredCustomMixin, ListView):
 class CreateHandoutView(LoginRequiredCustomMixin, CreateView):
     template_name = 'homaster/create.html'
     model = Handout
-    fields = ['type', 'pc_name', 'pl_name', 'front', 'back']
+    fields = ['pc_name', 'pl_name', 'front', 'back']
+    success_url = reverse_lazy("homaster:engawa")
 
     def get(self, request, *args, **kwargs):
         # クエリパラメータが不正の場合，自動で"1"とする
@@ -88,21 +89,40 @@ class CreateHandoutView(LoginRequiredCustomMixin, CreateView):
         else:
             return super().get(request, *args, **kwargs)
 
-    def get_form(self, form_class=None):
-        form = super().get_form(form_class)
-        param = self.request.GET.get("type")
-        form.fields['type'] = fields.CharField(label="ハンドアウト種別", initial=HANDOUT_TYPE_DICT[param], disabled=True)
-        return form
-
     def get_context_data(self, **kwargs):
+        param = self.request.GET.get("type")
         context = super().get_context_data(**kwargs)
         context['role_name'] = self.request.session['role_name']
+        context['ho_type'] = HANDOUT_TYPE_DICT[param]
         return context
 
-    def post(self, request, *args, **kwargs):
-        form = self.get_form()
-        print(request.POST)
-        return redirect('homaster:engawa')
+    def form_valid(self, form):
+        print("form_valid")
+        handout = form.save(commit=False)
+        ho_type = self.request.GET.get("type", default=None)
+        engawa = self.request.user.engawa
+        is_pc = (ho_type == "1")
+        if is_pc:
+            # p_codeの払い出し
+            code = ''.join(random.choices(string.ascii_lowercase + string.digits, k=8))
+        else:
+            code = ""
+        handout.engawa_id = engawa.uuid
+        handout.type = int(ho_type)
+        handout.p_code = code
+        self.object = form.save()
+
+        # PCを作成する場合，紐づくPLを作成する
+        if is_pc:
+            Player.objects.create(engawa=engawa, handout=self.object, p_code=code, gm_flag=False)
+
+        return HttpResponseRedirect(self.get_success_url())
+
+    # def post(self, request, *args, **kwargs):
+    #     print("post")
+    #     form = self.get_form()
+    #     print(request.POST)
+    #     return redirect('homaster:engawa')
 
 class HandoutTypeChoiceView(BSModalFormView):
     template_name = 'homaster/type_choice_modal.html'
