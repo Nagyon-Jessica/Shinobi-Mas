@@ -52,11 +52,15 @@ class IndexView(TemplateView):
         request.user = player
 
         # 管理画面にリダイレクト
-        return HttpResponseRedirect('homaster:engawa')
+        return HttpResponseRedirect('engawa')
 
 class EngawaView(LoginRequiredCustomMixin, ListView):
     template_name = 'homaster/engawa.html'
     model = Handout
+
+    def get_queryset(self):
+        engawa = self.request.user.engawa
+        return Handout.objects.filter(engawa=engawa).order_by('type')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
