@@ -5,5 +5,11 @@
   <title>ハンドアウト作成 - Shinobi-Mas</title>
 </head>
 <body>
-Create!!
+  あなたは{{ role_name }}です<br>
+  <form action="" method="POST">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit" class="btn btn-primary">保存</button>
+  </form>
+  <br><br>
 </body>

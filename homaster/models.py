@@ -6,15 +6,15 @@ class MyManager(BaseUserManager):
 
 class Engawa(models.Model):
     uuid = models.CharField(max_length=36, primary_key=True)
-    scenario_name = models.CharField(max_length=255)
+    scenario_name = models.CharField(verbose_name="シナリオ名", max_length=100)
 
 class Handout(models.Model):
     engawa = models.ForeignKey(Engawa, on_delete=models.CASCADE, db_index=True)
     type = models.PositiveSmallIntegerField()
-    pc_name = models.CharField(max_length=255, null=True, blank=True)
-    pl_name = models.CharField(max_length=255, null=True, blank=True)
-    front = models.CharField(max_length=1023, null=True, blank=True)
-    back = models.CharField(max_length=1023, null=True, blank=True)
+    pc_name = models.CharField(verbose_name="PC名", max_length=100, null=True, blank=True)
+    pl_name = models.CharField(verbose_name="PL名", max_length=100, null=True, blank=True)
+    front = models.TextField(verbose_name="使命(表)", max_length=1000, null=True, blank=True)
+    back = models.TextField(verbose_name="秘密(裏)", max_length=1000, null=True, blank=True)
     invitation_code = models.CharField(max_length=8, null=True, blank=True)
 
 class Player(AbstractBaseUser):

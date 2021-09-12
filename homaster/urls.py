@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
 
+app_name = 'homaster'
 urlpatterns = [
     path('index', views.IndexView.as_view(), name='index'),
     path('engawa', views.EngawaView.as_view(), name='engawa'),
