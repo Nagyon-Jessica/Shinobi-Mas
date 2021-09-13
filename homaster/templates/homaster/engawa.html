@@ -15,7 +15,7 @@
   <button type="button" class="button">ENGAWAを削除する</button>
   {% if object_list %}
   {% for handout in object_list %}
-  <li>ID: {{ handout.id }}, type: {{ handout.type }}, PC名: {{ handout.pc_name }}, PL名: {{ handout.pl_name }}</li>
+  <li>ハンドアウト名: {{ handout.ho_name }}, type: {{ handout.type }}, PC名: {{ handout.pc_name }}, PL名: {{ handout.pl_name }}</li>
   {% endfor %}
   {% endif %}
   <div class="modal fade" tabindex="-1" role="dialog" id="modal">

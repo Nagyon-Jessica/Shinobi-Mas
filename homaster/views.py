@@ -1,4 +1,5 @@
 import uuid, random, string
+from itertools import groupby
 from django.urls import reverse, reverse_lazy
 from django.http import Http404
 from django.http.response import HttpResponseRedirect
@@ -78,6 +79,16 @@ class EngawaView(LoginRequiredCustomMixin, ListView):
             role_name = f"PC{pl_num}"
         context['role_name'] = role_name
         self.request.session['role_name'] = role_name
+
+        # 表示するハンドアウトが存在する場合，ハンドアウト名リストを生成
+        if context['object_list']:
+            ho_names = []
+            for t, hos in groupby(context['object_list'], key=lambda x: x.type):
+                type = HANDOUT_TYPE_DICT[str(t)]
+                for i, ho in enumerate(hos):
+                    ho_names.append(type + str(i + 1))
+            for i, ho_name in enumerate(ho_names):
+                context['object_list'][i].ho_name = ho_name
         return context
 
 class CreateHandoutView(LoginRequiredCustomMixin, CreateView):
