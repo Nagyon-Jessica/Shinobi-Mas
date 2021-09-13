@@ -32,6 +32,11 @@ def signin(request, **kwargs):
     # ハンドアウト一覧画面へ遷移
     return HttpResponseRedirect('engawa')
 
+def close_engawa(request):
+    """使い終わったENGAWAを削除する"""
+    request.user.engawa.delete()
+    return redirect("homaster:index")
+
 class IndexView(TemplateView):
     template_name = 'homaster/index.html'
 
