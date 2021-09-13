@@ -11,6 +11,7 @@ class Engawa(models.Model):
 class Handout(models.Model):
     engawa = models.ForeignKey(Engawa, on_delete=models.CASCADE, db_index=True)
     type = models.PositiveSmallIntegerField()
+    hidden = models.BooleanField(verbose_name="非公開", null=True, blank=True)
     pc_name = models.CharField(verbose_name="PC名", max_length=100, null=True, blank=True)
     pl_name = models.CharField(verbose_name="PL名", max_length=100, null=True, blank=True)
     front = models.TextField(verbose_name="使命(表)", max_length=1000, null=True, blank=True)
