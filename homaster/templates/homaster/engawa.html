@@ -5,6 +5,7 @@
   <meta charset="utf-8">
   <title>{{ engawa.scenario_name }} - Shinobi-Mas</title>
   <link rel="stylesheet" href="{% static 'assets/css/bootstrap.css' %}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
   <script src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
@@ -14,9 +15,22 @@
   シナリオ名：{{ engawa.scenario_name }}
   <a href="{% url 'homaster:close-engawa' %}" class="btn btn-danger">ENGAWAを削除する</a>
   {% if object_list %}
+  <div class="list-group">
   {% for handout in object_list %}
-  <li>ハンドアウト名: {{ handout.ho_name }}, type: {{ handout.type }}, PC名: {{ handout.pc_name }}, PL名: {{ handout.pl_name }}</li>
+  <ul class="list-group-item">
+    {{ handout.ho_name }}
+    PC名: {{ handout.pc_name }}
+    PL名: {{ handout.pl_name }}
+    {{ handout.front }}<br>
+    <i class="far fa-edit"></i>
+    <i class="far fa-eye"></i>
+    <i class="fas fa-user-plus"></i>
+    <a>
+      <i class="far fa-trash-alt"></i>
+    </a>
+  </ul>
   {% endfor %}
+  </div>
   {% endif %}
   <div class="modal fade" tabindex="-1" role="dialog" id="modal">
     <div class="modal-dialog" role="document">
