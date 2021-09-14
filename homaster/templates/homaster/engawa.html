@@ -28,9 +28,11 @@
     <a title="閲覧権限管理">
       <i class="far fa-eye"></i>
     </a>
+    {% if handout.type == 1 %}
     <span class="invite text-dark" title="プレイヤー招待">
       <i class="fas fa-user-plus"></i>
     </span>
+    {% endif %}
     <a href="{% url 'homaster:delete' %}?id={{ handout.id }}" class="text-dark" title="削除">
       <i class="far fa-trash-alt"></i>
     </a>

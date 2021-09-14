@@ -95,7 +95,7 @@ class EngawaView(LoginRequiredCustomMixin, ListView):
             ho_names = []
             for t, hos in groupby(context['object_list'], key=lambda x: x.type):
                 type = HANDOUT_TYPE_DICT[str(t)]
-                for i, ho in enumerate(hos):
+                for i in range(len(list(hos))):
                     ho_names.append(type + str(i + 1))
             for i, ho_name in enumerate(ho_names):
                 context['object_list'][i].ho_name = ho_name
