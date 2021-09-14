@@ -22,10 +22,16 @@
     PC名: {{ handout.pc_name }}
     PL名: {{ handout.pl_name }}
     {{ handout.front }}<br>
+    <a title="編集">
     <i class="far fa-edit"></i>
+    </a>
+    <a title="閲覧権限管理">
     <i class="far fa-eye"></i>
+    </a>
+    <a title="プレイヤー招待">
     <i class="fas fa-user-plus"></i>
-    <a href="{% url 'homaster:delete' %}?id={{ handout.id }}" class="text-dark">
+    </a>
+    <a href="{% url 'homaster:delete' %}?id={{ handout.id }}" class="text-dark" title="削除">
       <i class="far fa-trash-alt"></i>
     </a>
   </ul>
