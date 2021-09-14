@@ -182,3 +182,24 @@ class HandoutTypeChoiceView(BSModalFormView):
         type = request.POST['type']
         redirect_url = reverse('homaster:create') + f'?type={type}'
         return redirect(redirect_url)
+
+class InviteView(BSModalFormView):
+    template_name = 'homaster/invite_modal.html'
+    form_class = HandoutTypeForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        ho_id = self.request.GET.get('id')
+        handout = Handout.objects.get(id=ho_id)
+        if not handout.pl_name:
+            handout.pl_name = "匿名プレイヤー"
+
+        # 招待用URLを生成
+        invite_url = "http://" + \
+            self.request.META.get("HTTP_HOST") + \
+                reverse('homaster:signin', kwargs={"uuid": handout.engawa.uuid}) + \
+                    "?p_code=" + handout.p_code
+
+        context['handout'] = handout
+        context['invite_url'] = invite_url
+        return context

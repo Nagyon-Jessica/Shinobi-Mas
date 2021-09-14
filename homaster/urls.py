@@ -9,6 +9,7 @@ urlpatterns = [
     path('create-handout', views.HandoutTypeChoiceView.as_view(), name='create-handout'),
     path('create', views.CreateHandoutView.as_view(), name='create'),
     path('delete', views.delete, name='delete'),
+    path('invite', views.InviteView.as_view(), name='invite'),
     # path('delete-handout', views.HandoutTypeChoiceView.as_view(), name='delete-handout'),
     path('<uuid>', views.signin, name='signin'),
 ]

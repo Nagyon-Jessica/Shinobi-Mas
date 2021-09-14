@@ -17,20 +17,20 @@
   {% if object_list %}
   <div class="list-group">
   {% for handout in object_list %}
-  <ul class="list-group-item">
+  <ul class="list-group-item" hoid="{{ handout.id }}">
     {{ handout.ho_name }}
     PC名: {{ handout.pc_name }}
     PL名: {{ handout.pl_name }}
     {{ handout.front }}<br>
     <a title="編集">
-    <i class="far fa-edit"></i>
+      <i class="far fa-edit"></i>
     </a>
     <a title="閲覧権限管理">
-    <i class="far fa-eye"></i>
+      <i class="far fa-eye"></i>
     </a>
-    <a title="プレイヤー招待">
-    <i class="fas fa-user-plus"></i>
-    </a>
+    <span class="invite text-dark" title="プレイヤー招待">
+      <i class="fas fa-user-plus"></i>
+    </span>
     <a href="{% url 'homaster:delete' %}?id={{ handout.id }}" class="text-dark" title="削除">
       <i class="far fa-trash-alt"></i>
     </a>
@@ -49,11 +49,16 @@
 </body>
 <script type="text/javascript">
   $(document).ready(function() {
-
     $("#create-handout").modalForm({
         formURL: "{% url 'homaster:create-handout' %}"
     });
 
+    $(".invite").each(function(index, element){
+      var hoid = $(element).parent().attr("hoid")
+      $(element).modalForm({
+        formURL: "{% url 'homaster:invite' %}?id=" + hoid
+      })
+    });
   });
 </script>
 </html>
