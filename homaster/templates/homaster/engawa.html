@@ -13,7 +13,9 @@
   <script src="{% static 'js/jquery.bootstrap.modal.forms.js' %}"></script>
   あなたは{{ role_name }}です<br>
   シナリオ名：{{ engawa.scenario_name }}
+  {% if player.gm_flag %}
   <a href="{% url 'homaster:close-engawa' %}" class="btn btn-danger">ENGAWAを削除する</a>
+  {% endif %}
   {% if object_list %}
   <div class="list-group">
   {% for handout in object_list %}
@@ -22,6 +24,7 @@
     PC名: {{ handout.pc_name }}
     PL名: {{ handout.pl_name }}
     {{ handout.front }}<br>
+    {% if player.gm_flag %}
     <a title="編集">
       <i class="far fa-edit"></i>
     </a>
@@ -36,6 +39,7 @@
     <a href="{% url 'homaster:delete' %}?id={{ handout.id }}" class="text-dark" title="削除">
       <i class="far fa-trash-alt"></i>
     </a>
+    {% endif %}
   </ul>
   {% endfor %}
   </div>
@@ -45,9 +49,11 @@
       <div class="modal-content"></div>
     </div>
   </div>
+  {% if player.gm_flag %}
   <div>
     <button id="create-handout" class="btn" type="button">ハンドアウトを追加する</button>
   </div>
+  {% endif %}
 </body>
 <script type="text/javascript">
   $(document).ready(function() {

@@ -71,7 +71,13 @@ class EngawaView(LoginRequiredCustomMixin, ListView):
 
     def get_queryset(self):
         engawa = self.request.user.engawa
-        return Handout.objects.filter(engawa=engawa).order_by('type')
+        if self.request.user.gm_flag:
+            return Handout.objects.filter(engawa=engawa).order_by('type')
+        else:
+            auth = Auth.objects.filter(player=self.request.user, auth_front=True)
+            handouts = list(map(lambda a: a.handout, auth))
+            handouts = sorted(handouts, key=lambda h: h.type)
+            return handouts
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -85,7 +91,7 @@ class EngawaView(LoginRequiredCustomMixin, ListView):
         else:
             # ENGAWAに所属するplayerのリスト
             players = Player.objects.filter(engawa=engawa).order_by("id")
-            pl_num = players.index(player) + 1
+            pl_num = list(players).index(player)
             role_name = f"PC{pl_num}"
         context['role_name'] = role_name
         self.request.session['role_name'] = role_name
