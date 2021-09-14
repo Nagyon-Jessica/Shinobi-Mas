@@ -32,6 +32,11 @@ def signin(request, **kwargs):
     # ハンドアウト一覧画面へ遷移
     return HttpResponseRedirect('engawa')
 
+def delete(request):
+    ho_id = request.GET.get('id')
+    Handout.objects.get(id=ho_id).delete()
+    return HttpResponseRedirect('engawa')
+
 def close_engawa(request):
     """使い終わったENGAWAを削除する"""
     request.user.engawa.delete()
