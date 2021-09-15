@@ -25,7 +25,7 @@
     PL名: {{ handout.pl_name }}
     {{ handout.front }}<br>
     {% if player.gm_flag %}
-    <a title="編集">
+    <a href="{% url 'homaster:update' handout.id %}" class="text-dark" title="編集">
       <i class="far fa-edit"></i>
     </a>
     <a title="閲覧権限管理">

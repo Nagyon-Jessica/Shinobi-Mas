@@ -7,7 +7,7 @@ from django.forms import fields, CheckboxInput
 from django.shortcuts import redirect
 from django.views.generic import TemplateView, ListView
 from django.views.generic.detail import DetailView
-from django.views.generic.edit import CreateView
+from django.views.generic.edit import CreateView, UpdateView
 from django.contrib.auth import authenticate, login
 from bootstrap_modal_forms.generic import BSModalFormView
 from .mixins import LoginRequiredCustomMixin
@@ -142,7 +142,6 @@ class CreateHandoutView(LoginRequiredCustomMixin, CreateView):
         return context
 
     def form_valid(self, form):
-        print("form_valid")
         handout = form.save(commit=False)
         ho_type = self.request.GET.get("type", default=None)
         engawa = self.request.user.engawa
@@ -200,6 +199,41 @@ class HandoutDetailView(LoginRequiredCustomMixin, DetailView):
         context['ho_type'] = HANDOUT_TYPE_DICT[str(handout.type)]
         context['handout'] = handout
         return context
+
+class UpdateHandoutView(LoginRequiredCustomMixin, UpdateView):
+    template_name = 'homaster/update.html'
+    model = Handout
+    fields = ['pc_name', 'pl_name', 'hidden', 'front', 'back']
+    success_url = reverse_lazy("homaster:engawa")
+
+    def get_form(self):
+        form = super().get_form()
+        ho_type = self.object.type
+        if ho_type == 1:
+            form.fields['hidden'].widget = forms.HiddenInput()
+        else:
+            form.fields['hidden'] = fields.BooleanField(
+                label="非公開（シナリオ開始時には表を含め公開されません）",
+                required=False,
+                widget=CheckboxInput(attrs={'class': 'check'})
+            )
+        return form
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['role_name'] = self.request.session['role_name']
+        ho_type = context['object'].type
+        context['ho_type'] = HANDOUT_TYPE_DICT[str(ho_type)]
+        return context
+
+    def form_valid(self, form):
+        ho_after = form.save(commit=False)
+        ho_before = Handout.objects.get(id=ho_after.id)
+        # hiddenが変わる場合は紐づくAuthのauth_frontも更新
+        if ho_after.hidden != ho_before.hidden:
+            Auth.objects.filter(handout=ho_before).update(auth_front=(not ho_after.hidden))
+        self.object = form.save()
+        return HttpResponseRedirect(self.get_success_url())
 
 class HandoutTypeChoiceView(BSModalFormView):
     template_name = 'homaster/type_choice_modal.html'
