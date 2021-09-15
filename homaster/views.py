@@ -6,6 +6,7 @@ from django.http.response import HttpResponseRedirect
 from django.forms import fields, CheckboxInput
 from django.shortcuts import redirect
 from django.views.generic import TemplateView, ListView
+from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView
 from django.contrib.auth import authenticate, login
 from bootstrap_modal_forms.generic import BSModalFormView
@@ -179,6 +180,18 @@ class CreateHandoutView(LoginRequiredCustomMixin, CreateView):
                 Auth.objects.create(player=pl, handout=self.object, auth_front=(not is_hidden), auth_back=False)
 
         return HttpResponseRedirect(self.get_success_url())
+
+class HandoutDetailView(LoginRequiredCustomMixin, DetailView):
+    template_name = 'homaster/detail.html'
+    model = Handout
+
+    def get_context_data(self, **kwargs):
+        handout = kwargs['object']
+        context = super().get_context_data(**kwargs)
+        context['role_name'] = self.request.session['role_name']
+        context['ho_type'] = HANDOUT_TYPE_DICT[str(handout.type)]
+        context['handout'] = handout
+        return context
 
 class HandoutTypeChoiceView(BSModalFormView):
     template_name = 'homaster/type_choice_modal.html'

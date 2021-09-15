@@ -20,7 +20,7 @@
   <div class="list-group">
   {% for handout in object_list %}
   <ul class="list-group-item" hoid="{{ handout.id }}">
-    {{ handout.ho_name }}
+    <a href="{% url 'homaster:detail' handout.id %}">{{ handout.ho_name }}</a>
     PC名: {{ handout.pc_name }}
     PL名: {{ handout.pl_name }}
     {{ handout.front }}<br>
