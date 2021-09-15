@@ -15,7 +15,9 @@
     {{ handout.pc_name }}
     {{ handout.pl_name }}
     {{ handout.front }}
+    {% if allowed %}
     {{ handout.back }}
+    {% endif %}
   </div>
   <a class="btn btn-secondary" href="{{ request.META.HTTP_REFERER }}">戻る</a>
   <br><br>

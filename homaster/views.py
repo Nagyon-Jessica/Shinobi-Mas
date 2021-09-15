@@ -188,6 +188,14 @@ class HandoutDetailView(LoginRequiredCustomMixin, DetailView):
     def get_context_data(self, **kwargs):
         handout = kwargs['object']
         context = super().get_context_data(**kwargs)
+
+        player = self.request.user
+        if player.gm_flag:
+            context['allowed'] = True
+        else:
+            auth = Auth.objects.get(handout=handout, player=player)
+            context['allowed'] = auth.auth_back
+
         context['role_name'] = self.request.session['role_name']
         context['ho_type'] = HANDOUT_TYPE_DICT[str(handout.type)]
         context['handout'] = handout
