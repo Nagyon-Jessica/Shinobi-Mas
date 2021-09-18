@@ -10,6 +10,7 @@ urlpatterns = [
     path('create', views.CreateHandoutView.as_view(), name='create'),
     path('detail/<int:pk>', views.HandoutDetailView.as_view(), name='detail'),
     path('update/<int:pk>', views.UpdateHandoutView.as_view(), name='update'),
+    path('auth-control', views.AuthControlView.as_view(), name='auth-control'),
     path('delete', views.delete, name='delete'),
     path('invite', views.InviteView.as_view(), name='invite'),
     # path('delete-handout', views.HandoutTypeChoiceView.as_view(), name='delete-handout'),

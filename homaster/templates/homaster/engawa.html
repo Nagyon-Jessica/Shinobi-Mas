@@ -19,7 +19,7 @@
   {% if object_list %}
   <div class="list-group">
   {% for handout in object_list %}
-  <ul class="list-group-item" hoid="{{ handout.id }}">
+  <ul class="list-group-item" hoid="{{ handout.id }}" honame="{{ handout.ho_name }}">
     <a href="{% url 'homaster:detail' handout.id %}">{{ handout.ho_name }}</a>
     PC名: {{ handout.pc_name }}
     PL名: {{ handout.pl_name }}
@@ -28,9 +28,9 @@
     <a href="{% url 'homaster:update' handout.id %}" class="text-dark" title="編集">
       <i class="far fa-edit"></i>
     </a>
-    <a title="閲覧権限管理">
+    <span class="auth-control text-dark" title="閲覧権限管理">
       <i class="far fa-eye"></i>
-    </a>
+    </span>
     {% if handout.type == 1 %}
     <span class="invite text-dark" title="プレイヤー招待">
       <i class="fas fa-user-plus"></i>
@@ -61,12 +61,42 @@
         formURL: "{% url 'homaster:create-handout' %}"
     });
 
+    $(".auth-control").each(function(index, element){
+      var hoid = $(element).parent().attr("hoid")
+      var honame = $(element).parent().attr("honame")
+      $(element).modalForm({
+        formURL: "{% url 'homaster:auth-control' %}?id=" + hoid + "&name=" + honame
+      })
+    });
+
     $(".invite").each(function(index, element){
       var hoid = $(element).parent().attr("hoid")
       $(element).modalForm({
         formURL: "{% url 'homaster:invite' %}?id=" + hoid
       })
     });
+  });
+
+  $('#modal').on('shown.bs.modal', function(event){
+    $('input[name="auth_front"]').each(function(index){
+      if ($(this).prop('checked') == false){
+        var value = $(this).val();
+        $('input[name=auth_back][value=' + value + ']').prop('disabled', true);
+      }
+    });
+  });
+
+  // 非公開ハンドアウトの場合，表がcheckedの時だけ裏を選択可能とする
+  $(document).on("click", 'input[name="auth_front"]',function() {
+    var value = $(this).val();
+    var sel = 'input[name="auth_back"][value=' + value + ']'
+    if ( $(this).prop('checked') == false ) {
+      // 裏だけ公開にならないようチェックを外す
+      $(sel).prop('checked', false);
+      $(sel).prop('disabled', true);
+    } else {
+      $(sel).prop('disabled', false);
+    }
   });
 </script>
 </html>

@@ -244,6 +244,57 @@ class HandoutTypeChoiceView(BSModalFormView):
         redirect_url = reverse('homaster:create') + f'?type={type}'
         return redirect(redirect_url)
 
+class AuthControlView(BSModalFormView):
+    template_name = 'homaster/auth_control_modal.html'
+    form_class = AuthControlForm
+    success_url = reverse_lazy("homaster:engawa")
+
+    def get_context_data(self, **kwargs):
+        ho_name = self.request.GET.get('name')
+        context = super().get_context_data(**kwargs)
+        context['ho_name'] = ho_name
+        return context
+
+    def get_form(self):
+        form = super().get_form()
+        ho_id = self.request.GET.get('id')
+        handout = Handout.objects.get(id=ho_id)
+        auths = Auth.objects.filter(handout=handout)
+        choices_front = []
+        choices_back = []
+        if handout.hidden:
+            # 非公開＝NPC/HOなので自身を含む場合を考慮する必要なし
+            for auth in auths:
+                choices_front.append((str(auth.id), auth.player.handout.pc_name))
+                choices_back.append((str(auth.id), auth.player.handout.pc_name))
+            form.fields['auth_front'].choices = tuple(choices_front)
+            form.fields['auth_front'].initial = [a.id for a in auths if a.auth_front]
+            form.fields['auth_back'].choices = tuple(choices_back)
+            form.fields['auth_back'].initial = [a.id for a in auths if a.auth_back]
+        else:
+            del form.fields['auth_front']
+            for auth in auths:
+                # PCの場合自身を選択肢に含めない
+                if auth.handout.id != auth.player.handout.id:
+                    choices_back.append((str(auth.id), auth.player.handout.pc_name))
+            form.fields['auth_back'].choices = tuple(choices_back)
+            form.fields['auth_back'].initial = [a.id for a in auths if a.handout.id != a.player.handout.id and a.auth_back]
+        return form
+
+    def form_valid(self, form):
+        choices = form.fields['auth_back']._choices
+        for choice in choices:
+            kwargs = {}
+            # 裏が公開なら自動的に表も公開と決まる
+            if choice[0] in self.request.POST.getlist("auth_back"):
+                kwargs = {"auth_front": True, "auth_back": True}
+            else:
+                kwargs['auth_back'] = False
+                if 'auth_front' in form.fields.keys():
+                    kwargs['auth_front'] = choice[0] in self.request.POST.getlist("auth_front")
+            Auth.objects.filter(id=int(choice[0])).update(**kwargs)
+        return redirect("homaster:engawa")
+
 class InviteView(BSModalFormView):
     template_name = 'homaster/invite_modal.html'
     form_class = HandoutTypeForm
