@@ -6,8 +6,13 @@
 </div>
 
 <div class="modal-body">
-  このURLをプレイヤーに共有してください<br>
-  {{ invite_url }}
+  このURLをプレイヤーに共有してください
+  <div class="card">
+    <div class="card-body">
+      {{ invite_url }}
+      <i class="fa fa-paste" data-toggle="tooltip" data-placement="bottom" title="クリックでコピーできます"></i>
+    </div>
+  </div>
 </div>
 
 <div class="modal-footer">

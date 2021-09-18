@@ -9,7 +9,7 @@
 </head>
 <body>
   <script src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
-  <script src="{% static 'assets/js/bootstrap.js' %}"></script>
+  <script src="{% static 'assets/js/bootstrap.bundle.js' %}"></script>
   <script src="{% static 'js/jquery.bootstrap.modal.forms.js' %}"></script>
   あなたは{{ role_name }}です<br>
   シナリオ名：{{ engawa.scenario_name }}
@@ -56,6 +56,8 @@
   {% endif %}
 </body>
 <script type="text/javascript">
+  const sleep = waitTime => new Promise( resolve => setTimeout(resolve, waitTime) );
+
   $(document).ready(function() {
     $("#create-handout").modalForm({
         formURL: "{% url 'homaster:create-handout' %}"
@@ -77,13 +79,17 @@
     });
   });
 
+  // モーダル表示時の初期化処理
   $('#modal').on('shown.bs.modal', function(event){
+    // 表にチェックが付いていない裏を選択不能に
     $('input[name="auth_front"]').each(function(index){
       if ($(this).prop('checked') == false){
         var value = $(this).val();
         $('input[name=auth_back][value=' + value + ']').prop('disabled', true);
       }
     });
+    // コピーアイコンのtooltipを有効化
+    $('i.fa-paste').tooltip('enable')
   });
 
   // 非公開ハンドアウトの場合，表がcheckedの時だけ裏を選択可能とする
@@ -97,6 +103,22 @@
     } else {
       $(sel).prop('disabled', false);
     }
+  });
+
+  // mousedown：「コピーしました」tooltip表示
+  $(document).on("mousedown", 'i.fa-paste',function() {
+    var url = $(".card-body").text().trim();
+    navigator.clipboard.writeText(url).then(e => {
+      $(this).attr('data-original-title', 'コピーしました！')
+             .tooltip('show')
+    });
+  });
+
+  // mouseup：「コピーできます」に戻る
+  $(document).on("mouseup", 'i.fa-paste', async function() {
+    await sleep(2000);
+    $(this).attr('data-original-title', 'クリックでコピーできます')
+           .tooltip('hide')
   });
 </script>
 </html>
