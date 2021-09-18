@@ -72,13 +72,7 @@ class EngawaView(LoginRequiredCustomMixin, ListView):
 
     def get_queryset(self):
         engawa = self.request.user.engawa
-        if self.request.user.gm_flag:
-            return Handout.objects.filter(engawa=engawa).order_by('type')
-        else:
-            auth = Auth.objects.filter(player=self.request.user, auth_front=True)
-            handouts = list(map(lambda a: a.handout, auth))
-            handouts = sorted(handouts, key=lambda h: h.type)
-            return handouts
+        return Handout.objects.filter(engawa=engawa).order_by('type')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -98,6 +92,7 @@ class EngawaView(LoginRequiredCustomMixin, ListView):
         self.request.session['role_name'] = role_name
 
         # 表示するハンドアウトが存在する場合，ハンドアウト名リストを生成
+        # ユーザがGMでない場合，ハンドアウト名を紐付けた後で非公開ハンドアウトを除外
         if context['object_list']:
             ho_names = []
             for t, hos in groupby(context['object_list'], key=lambda x: x.type):
@@ -106,6 +101,10 @@ class EngawaView(LoginRequiredCustomMixin, ListView):
                     ho_names.append(type + str(i + 1))
             for i, ho_name in enumerate(ho_names):
                 context['object_list'][i].ho_name = ho_name
+            if not self.request.user.gm_flag:
+                auths = Auth.objects.filter(player=self.request.user, auth_front=True)
+                allowed_ho_ids = list(map(lambda a: a.handout.id, auths))
+                context['object_list'] = list(filter(lambda h: h.id in allowed_ho_ids, context['object_list']))
         return context
 
 class CreateHandoutView(LoginRequiredCustomMixin, CreateView):
