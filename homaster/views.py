@@ -1,11 +1,13 @@
 import uuid, random, string
+from itertools import groupby
 from django.urls import reverse, reverse_lazy
 from django.http import Http404
 from django.http.response import HttpResponseRedirect
-from django.forms import fields
+from django.forms import fields, CheckboxInput
 from django.shortcuts import redirect
 from django.views.generic import TemplateView, ListView
-from django.views.generic.edit import CreateView
+from django.views.generic.detail import DetailView
+from django.views.generic.edit import CreateView, UpdateView
 from django.contrib.auth import authenticate, login
 from bootstrap_modal_forms.generic import BSModalFormView
 from .mixins import LoginRequiredCustomMixin
@@ -31,6 +33,16 @@ def signin(request, **kwargs):
     # ハンドアウト一覧画面へ遷移
     return HttpResponseRedirect('engawa')
 
+def delete(request):
+    ho_id = request.GET.get('id')
+    Handout.objects.get(id=ho_id).delete()
+    return HttpResponseRedirect('engawa')
+
+def close_engawa(request):
+    """使い終わったENGAWAを削除する"""
+    request.user.engawa.delete()
+    return redirect("homaster:index")
+
 class IndexView(TemplateView):
     template_name = 'homaster/index.html'
 
@@ -52,11 +64,15 @@ class IndexView(TemplateView):
         request.user = player
 
         # 管理画面にリダイレクト
-        return HttpResponseRedirect('homaster:engawa')
+        return HttpResponseRedirect('engawa')
 
 class EngawaView(LoginRequiredCustomMixin, ListView):
     template_name = 'homaster/engawa.html'
     model = Handout
+
+    def get_queryset(self):
+        engawa = self.request.user.engawa
+        return Handout.objects.filter(engawa=engawa).order_by('type')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -70,16 +86,31 @@ class EngawaView(LoginRequiredCustomMixin, ListView):
         else:
             # ENGAWAに所属するplayerのリスト
             players = Player.objects.filter(engawa=engawa).order_by("id")
-            pl_num = players.index(player) + 1
+            pl_num = list(players).index(player)
             role_name = f"PC{pl_num}"
         context['role_name'] = role_name
         self.request.session['role_name'] = role_name
+
+        # 表示するハンドアウトが存在する場合，ハンドアウト名リストを生成
+        # ユーザがGMでない場合，ハンドアウト名を紐付けた後で非公開ハンドアウトを除外
+        if context['object_list']:
+            ho_names = []
+            for t, hos in groupby(context['object_list'], key=lambda x: x.type):
+                type = HANDOUT_TYPE_DICT[str(t)]
+                for i in range(len(list(hos))):
+                    ho_names.append(type + str(i + 1))
+            for i, ho_name in enumerate(ho_names):
+                context['object_list'][i].ho_name = ho_name
+            if not self.request.user.gm_flag:
+                auths = Auth.objects.filter(player=self.request.user, auth_front=True)
+                allowed_ho_ids = list(map(lambda a: a.handout.id, auths))
+                context['object_list'] = list(filter(lambda h: h.id in allowed_ho_ids, context['object_list']))
         return context
 
 class CreateHandoutView(LoginRequiredCustomMixin, CreateView):
     template_name = 'homaster/create.html'
     model = Handout
-    fields = ['pc_name', 'pl_name', 'front', 'back']
+    fields = ['pc_name', 'pl_name', 'hidden', 'front', 'back']
     success_url = reverse_lazy("homaster:engawa")
 
     def get(self, request, *args, **kwargs):
@@ -89,6 +120,19 @@ class CreateHandoutView(LoginRequiredCustomMixin, CreateView):
         else:
             return super().get(request, *args, **kwargs)
 
+    def get_form(self):
+        form = super().get_form()
+        ho_type = self.request.GET.get("type", default=None)
+        if ho_type == "1":
+            form.fields['hidden'].widget = forms.HiddenInput()
+        else:
+            form.fields['hidden'] = fields.BooleanField(
+                label="非公開（シナリオ開始時には表を含め公開されません）",
+                required=False,
+                widget=CheckboxInput(attrs={'class': 'check'})
+            )
+        return form
+
     def get_context_data(self, **kwargs):
         param = self.request.GET.get("type")
         context = super().get_context_data(**kwargs)
@@ -97,7 +141,6 @@ class CreateHandoutView(LoginRequiredCustomMixin, CreateView):
         return context
 
     def form_valid(self, form):
-        print("form_valid")
         handout = form.save(commit=False)
         ho_type = self.request.GET.get("type", default=None)
         engawa = self.request.user.engawa
@@ -112,17 +155,84 @@ class CreateHandoutView(LoginRequiredCustomMixin, CreateView):
         handout.p_code = code
         self.object = form.save()
 
-        # PCを作成する場合，紐づくPLを作成する
+        # PCを作成する場合，紐づくPLと，そのPLの既存ハンドアウトに対する権限レコードを作成する
         if is_pc:
-            Player.objects.create(engawa=engawa, handout=self.object, p_code=code, gm_flag=False)
+            player, _ = Player.objects.get_or_create(engawa=engawa, handout=self.object, p_code=code, gm_flag=False)
+            handouts = Handout.objects.filter(engawa=engawa)
+            for ho in handouts:
+                if ho == self.object:
+                    continue
+                Auth.objects.create(player=player, handout=ho, auth_front=bool(not ho.hidden), auth_back=False)
+
+        # PLが存在する場合，作成するハンドアウトについてのAuthレコードを作成する
+        players = Player.objects.filter(engawa=engawa, gm_flag=False)
+        is_hidden = getattr(handout, 'hidden', False)
+        if is_pc:
+            # PCの場合，PLがハンドアウトの所有者の時のみ裏を公開
+            for pl in players:
+                is_owner = (pl.handout == self.object)
+                Auth.objects.create(player=pl, handout=self.object, auth_front=True, auth_back=is_owner)
+        else:
+            # PC以外の場合，「非公開」にチェックが入った時のみ表も非公開
+            for pl in players:
+                Auth.objects.create(player=pl, handout=self.object, auth_front=(not is_hidden), auth_back=False)
 
         return HttpResponseRedirect(self.get_success_url())
 
-    # def post(self, request, *args, **kwargs):
-    #     print("post")
-    #     form = self.get_form()
-    #     print(request.POST)
-    #     return redirect('homaster:engawa')
+class HandoutDetailView(LoginRequiredCustomMixin, DetailView):
+    template_name = 'homaster/detail.html'
+    model = Handout
+
+    def get_context_data(self, **kwargs):
+        handout = kwargs['object']
+        context = super().get_context_data(**kwargs)
+
+        player = self.request.user
+        if player.gm_flag:
+            context['allowed'] = True
+        else:
+            auth = Auth.objects.get(handout=handout, player=player)
+            context['allowed'] = auth.auth_back
+
+        context['role_name'] = self.request.session['role_name']
+        context['ho_type'] = HANDOUT_TYPE_DICT[str(handout.type)]
+        context['handout'] = handout
+        return context
+
+class UpdateHandoutView(LoginRequiredCustomMixin, UpdateView):
+    template_name = 'homaster/update.html'
+    model = Handout
+    fields = ['pc_name', 'pl_name', 'hidden', 'front', 'back']
+    success_url = reverse_lazy("homaster:engawa")
+
+    def get_form(self):
+        form = super().get_form()
+        ho_type = self.object.type
+        if ho_type == 1:
+            form.fields['hidden'].widget = forms.HiddenInput()
+        else:
+            form.fields['hidden'] = fields.BooleanField(
+                label="非公開（シナリオ開始時には表を含め公開されません）",
+                required=False,
+                widget=CheckboxInput(attrs={'class': 'check'})
+            )
+        return form
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['role_name'] = self.request.session['role_name']
+        ho_type = context['object'].type
+        context['ho_type'] = HANDOUT_TYPE_DICT[str(ho_type)]
+        return context
+
+    def form_valid(self, form):
+        ho_after = form.save(commit=False)
+        ho_before = Handout.objects.get(id=ho_after.id)
+        # hiddenが変わる場合は紐づくAuthのauth_frontも更新
+        if ho_after.hidden != ho_before.hidden:
+            Auth.objects.filter(handout=ho_before).update(auth_front=(not ho_after.hidden))
+        self.object = form.save()
+        return HttpResponseRedirect(self.get_success_url())
 
 class HandoutTypeChoiceView(BSModalFormView):
     template_name = 'homaster/type_choice_modal.html'
@@ -132,3 +242,75 @@ class HandoutTypeChoiceView(BSModalFormView):
         type = request.POST['type']
         redirect_url = reverse('homaster:create') + f'?type={type}'
         return redirect(redirect_url)
+
+class AuthControlView(BSModalFormView):
+    template_name = 'homaster/auth_control_modal.html'
+    form_class = AuthControlForm
+    success_url = reverse_lazy("homaster:engawa")
+
+    def get_context_data(self, **kwargs):
+        ho_name = self.request.GET.get('name')
+        context = super().get_context_data(**kwargs)
+        context['ho_name'] = ho_name
+        return context
+
+    def get_form(self):
+        form = super().get_form()
+        ho_id = self.request.GET.get('id')
+        handout = Handout.objects.get(id=ho_id)
+        auths = Auth.objects.filter(handout=handout)
+        choices_front = []
+        choices_back = []
+        if handout.hidden:
+            # 非公開＝NPC/HOなので自身を含む場合を考慮する必要なし
+            for auth in auths:
+                choices_front.append((str(auth.id), auth.player.handout.pc_name))
+                choices_back.append((str(auth.id), auth.player.handout.pc_name))
+            form.fields['auth_front'].choices = tuple(choices_front)
+            form.fields['auth_front'].initial = [a.id for a in auths if a.auth_front]
+            form.fields['auth_back'].choices = tuple(choices_back)
+            form.fields['auth_back'].initial = [a.id for a in auths if a.auth_back]
+        else:
+            del form.fields['auth_front']
+            for auth in auths:
+                # PCの場合自身を選択肢に含めない
+                if auth.handout.id != auth.player.handout.id:
+                    choices_back.append((str(auth.id), auth.player.handout.pc_name))
+            form.fields['auth_back'].choices = tuple(choices_back)
+            form.fields['auth_back'].initial = [a.id for a in auths if a.handout.id != a.player.handout.id and a.auth_back]
+        return form
+
+    def form_valid(self, form):
+        choices = form.fields['auth_back']._choices
+        for choice in choices:
+            kwargs = {}
+            # 裏が公開なら自動的に表も公開と決まる
+            if choice[0] in self.request.POST.getlist("auth_back"):
+                kwargs = {"auth_front": True, "auth_back": True}
+            else:
+                kwargs['auth_back'] = False
+                if 'auth_front' in form.fields.keys():
+                    kwargs['auth_front'] = choice[0] in self.request.POST.getlist("auth_front")
+            Auth.objects.filter(id=int(choice[0])).update(**kwargs)
+        return redirect("homaster:engawa")
+
+class InviteView(BSModalFormView):
+    template_name = 'homaster/invite_modal.html'
+    form_class = HandoutTypeForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        ho_id = self.request.GET.get('id')
+        handout = Handout.objects.get(id=ho_id)
+        if not handout.pl_name:
+            handout.pl_name = "匿名プレイヤー"
+
+        # 招待用URLを生成
+        invite_url = "http://" + \
+            self.request.META.get("HTTP_HOST") + \
+                reverse('homaster:signin', kwargs={"uuid": handout.engawa.uuid}) + \
+                    "?p_code=" + handout.p_code
+
+        context['handout'] = handout
+        context['invite_url'] = invite_url
+        return context
