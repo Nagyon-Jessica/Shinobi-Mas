@@ -125,6 +125,8 @@ class CreateHandoutView(LoginRequiredCustomMixin, CreateView):
     success_url = reverse_lazy("homaster:engawa")
 
     def get(self, request, *args, **kwargs):
+        if not request.user.gm_flag:
+            raise Http404("権限がありません")
         # クエリパラメータが不正の場合，自動で"1"とする
         if self.request.GET.get("type", default=None) not in ["1", "2", "3"]:
             return redirect('/create?type=1')
