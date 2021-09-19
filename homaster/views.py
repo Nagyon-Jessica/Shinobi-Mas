@@ -110,6 +110,7 @@ class EngawaView(LoginRequiredCustomMixin, ListView):
                 type = HANDOUT_TYPE_DICT[str(t)]
                 for i in range(len(list(hos))):
                     ho_names.append(type + str(i + 1))
+            self.request.session['ho_names'] = ho_names
             for i, ho_name in enumerate(ho_names):
                 context['object_list'][i].ho_name = ho_name
             if not self.request.user.gm_flag:
@@ -275,8 +276,11 @@ class AuthControlView(BSModalFormView):
 
     def get_context_data(self, **kwargs):
         ho_name = self.request.GET.get('name')
+        ho_id = self.request.GET.get('id')
+        handout = Handout.objects.get(id=ho_id)
         context = super().get_context_data(**kwargs)
         context['ho_name'] = ho_name
+        context['pc_name'] = handout.pc_name
         return context
 
     def get_form(self):
@@ -284,23 +288,30 @@ class AuthControlView(BSModalFormView):
         ho_id = self.request.GET.get('id')
         handout = Handout.objects.get(id=ho_id)
         auths = Auth.objects.filter(handout=handout)
+        ho_names = self.request.session['ho_names']
         choices_front = []
         choices_back = []
         if handout.hidden:
             # 非公開＝NPC/HOなので自身を含む場合を考慮する必要なし
-            for auth in auths:
-                choices_front.append((str(auth.id), auth.player.handout.pc_name))
-                choices_back.append((str(auth.id), auth.player.handout.pc_name))
+            for i, auth in enumerate(auths):
+                pc_name = auth.player.handout.pc_name
+                if not pc_name:
+                    pc_name = "未指定"
+                choices_front.append((str(auth.id), f"{ho_names[i]}({pc_name})"))
+                choices_back.append((str(auth.id), f"{ho_names[i]}({pc_name})"))
             form.fields['auth_front'].choices = tuple(choices_front)
             form.fields['auth_front'].initial = [a.id for a in auths if a.auth_front]
             form.fields['auth_back'].choices = tuple(choices_back)
             form.fields['auth_back'].initial = [a.id for a in auths if a.auth_back]
         else:
             del form.fields['auth_front']
-            for auth in auths:
+            for i, auth in enumerate(auths):
                 # PCの場合自身を選択肢に含めない
                 if auth.handout.id != auth.player.handout.id:
-                    choices_back.append((str(auth.id), auth.player.handout.pc_name))
+                    pc_name = auth.player.handout.pc_name
+                    if not pc_name:
+                        pc_name = "未指定"
+                    choices_back.append((str(auth.id), f"{ho_names[i]}({pc_name})"))
             form.fields['auth_back'].choices = tuple(choices_back)
             form.fields['auth_back'].initial = [a.id for a in auths if a.handout.id != a.player.handout.id and a.auth_back]
         return form
