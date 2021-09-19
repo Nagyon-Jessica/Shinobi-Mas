@@ -12,8 +12,8 @@
   あなたは{{ role_name }}です<br>
   ハンドアウト種別: {{ ho_type }}
   <div>
-    {{ handout.pc_name }}
-    {{ handout.pl_name }}
+    {{ handout.pc_name|default_if_none:"（未指定）" }}
+    {{ handout.pl_name|default_if_none:"（未指定）" }}
     {{ handout.front }}
     {% if allowed %}
     {{ handout.back }}
