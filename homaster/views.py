@@ -194,6 +194,11 @@ class HandoutDetailView(LoginRequiredCustomMixin, DetailView):
     template_name = 'homaster/detail.html'
     model = Handout
 
+    def get(self, request, *args, **kwargs):
+        ho_id = kwargs['pk']
+        get_object_or_404(Handout, engawa=request.user.engawa, id=ho_id)
+        return super().get(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         handout = kwargs['object']
         context = super().get_context_data(**kwargs)
