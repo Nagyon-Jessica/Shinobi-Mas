@@ -135,15 +135,15 @@
     });
 
     $(".auth-control").each(function(index, element){
-      var hoid = $(element).parent().attr("hoid")
-      var honame = $(element).parent().attr("honame")
+      var hoid = $(element).closest('ul').attr("hoid")
+      var honame = $(element).closest('ul').attr("honame")
       $(element).modalForm({
         formURL: "{% url 'homaster:auth-control' %}?id=" + hoid + "&name=" + honame
       })
     });
 
     $(".invite").each(function(index, element){
-      var hoid = $(element).parent().attr("hoid")
+      var hoid = $(element).closest('ul').attr("hoid")
       $(element).modalForm({
         formURL: "{% url 'homaster:invite' %}?id=" + hoid
       })
