@@ -37,8 +37,13 @@
       width: 100px;
       text-align: center;
       vertical-align: middle;
-      font-size: 28px;
+      font-size: 32px;
       font-weight: bold;
+    }
+    .ho-table .ho-table-tanzaku .ho-table-edit{
+      width: 100px;
+      text-align: center;
+      vertical-align: middle;
     }
     .ho-table .ho-table-tanzaku .ho-table-name-type{
       width: 50px;
@@ -74,26 +79,38 @@
   <div class="list-group">
   {% for handout in object_list %}
   <ul class="list-group-item" hoid="{{ handout.id }}" honame="{{ handout.ho_name }}">
-    <a href="{% url 'homaster:detail' handout.id %}">{{ handout.ho_name }}</a>
-    PC名: {{ handout.pc_name|default_if_none:"（未指定）" }}
-    PL名: {{ handout.pl_name|default_if_none:"（未指定）" }}
-    {{ handout.front }}<br>
-    {% if player.gm_flag %}
-    <a href="{% url 'homaster:update' handout.id %}" class="text-dark" title="編集">
-      <i class="far fa-edit"></i>
-    </a>
-    <span class="auth-control text-dark" title="閲覧権限管理">
-      <i class="far fa-eye"></i>
-    </span>
-    {% if handout.type == 1 %}
-    <span class="invite text-dark" title="プレイヤー招待">
-      <i class="fas fa-user-plus"></i>
-    </span>
-    {% endif %}
-    <a href="{% url 'homaster:delete' %}?id={{ handout.id }}" class="text-dark" title="削除">
-      <i class="far fa-trash-alt"></i>
-    </a>
-    {% endif %}
+    <table class="ho-table" border="1" rules="none">
+      <tr class="ho-table-tanzaku">
+        <td class="ho-table-id">
+          <a href="{% url 'homaster:detail' handout.id %}">{{ handout.ho_name }}</a>
+        </td>
+        <td class="ho-table-name-type">PC名:</td>
+        <td class="ho-table-name">{{ handout.pc_name|default_if_none:"（未指定）" }}</td>
+        <td class="ho-table-front" rowspan="2">{{ handout.front }}</td>
+      </tr>
+      <tr>
+        <td class="ho-table-edit">
+          {% if player.gm_flag %}
+          <a href="{% url 'homaster:update' handout.id %}" class="text-dark" title="編集">
+            <i class="far fa-edit"></i>
+          </a>
+          <span class="auth-control text-dark" title="閲覧権限管理">
+            <i class="far fa-eye"></i>
+          </span>
+          {% if handout.type == 1 %}
+          <span class="invite text-dark" title="プレイヤー招待">
+            <i class="fas fa-user-plus"></i>
+          </span>
+          {% endif %}
+          <a href="{% url 'homaster:delete' %}?id={{ handout.id }}" class="text-dark" title="削除">
+            <i class="far fa-trash-alt"></i>
+          </a>
+          {% endif %}
+        </td>
+        <td class="ho-table-name-type">PL名:</td>
+        <td class="ho-table-name">{{ handout.pl_name|default_if_none:"（未指定）" }}</td>
+      </tr>
+    </table>
   </ul>
   {% endfor %}
   </div>
