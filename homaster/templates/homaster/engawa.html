@@ -21,8 +21,8 @@
   {% for handout in object_list %}
   <ul class="list-group-item" hoid="{{ handout.id }}" honame="{{ handout.ho_name }}">
     <a href="{% url 'homaster:detail' handout.id %}">{{ handout.ho_name }}</a>
-    PC名: {{ handout.pc_name }}
-    PL名: {{ handout.pl_name }}
+    PC名: {{ handout.pc_name|default_if_none:"（未指定）" }}
+    PL名: {{ handout.pl_name|default_if_none:"（未指定）" }}
     {{ handout.front }}<br>
     {% if player.gm_flag %}
     <a href="{% url 'homaster:update' handout.id %}" class="text-dark" title="編集">
@@ -114,7 +114,7 @@
     });
   });
 
-  // mouseup：「コピーできます」に戻る
+  // mouseup：2秒後に「コピーできます」に戻る
   $(document).on("mouseup", 'i.fa-paste', async function() {
     await sleep(2000);
     $(this).attr('data-original-title', 'クリックでコピーできます')
