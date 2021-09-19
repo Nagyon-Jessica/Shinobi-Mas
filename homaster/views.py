@@ -223,6 +223,13 @@ class UpdateHandoutView(LoginRequiredCustomMixin, UpdateView):
     fields = ['pc_name', 'pl_name', 'hidden', 'front', 'back']
     success_url = reverse_lazy("homaster:engawa")
 
+    def get(self, request, *args, **kwargs):
+        if not request.user.gm_flag:
+            raise Http404("権限がありません")
+        ho_id = kwargs['pk']
+        get_object_or_404(Handout, engawa=request.user.engawa, id=ho_id)
+        return super().get(request, *args, **kwargs)
+
     def get_form(self):
         form = super().get_form()
         ho_type = self.object.type
