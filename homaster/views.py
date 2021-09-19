@@ -4,7 +4,7 @@ from django.urls import reverse, reverse_lazy
 from django.http import Http404
 from django.http.response import HttpResponseRedirect
 from django.forms import fields, CheckboxInput
-from django.shortcuts import redirect
+from django.shortcuts import get_object_or_404, redirect
 from django.views.generic import TemplateView, ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView
@@ -34,8 +34,19 @@ def signin(request, **kwargs):
     return HttpResponseRedirect('engawa')
 
 def delete(request):
+    # ログインユーザがGMでなければエラー
+    if not request.user.gm_flag:
+        raise Http404("権限がありません")
+
     ho_id = request.GET.get('id')
-    Handout.objects.get(id=ho_id).delete()
+    # 指定したIDのハンドアウトが存在しなければエラー
+    handout = get_object_or_404(Handout, id=ho_id)
+
+    # 他のENGAWAのハンドアウトを削除しようとしていたらエラー
+    if handout.engawa != request.user.engawa:
+        raise Http404("権限がありません")
+
+    handout.delete()
     return HttpResponseRedirect('engawa')
 
 def close_engawa(request):
