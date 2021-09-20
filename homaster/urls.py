@@ -4,6 +4,7 @@ from . import views
 app_name = 'homaster'
 urlpatterns = [
     path('index', views.IndexView.as_view(), name='index'),
+    path('reenter', views.ReenterView.as_view(), name='reenter'),
     path('engawa', views.EngawaView.as_view(), name='engawa'),
     path('close-engawa', views.ConfirmCloseView.as_view(), name='close-engawa'),
     path('close', views.close_engawa, name='close'),

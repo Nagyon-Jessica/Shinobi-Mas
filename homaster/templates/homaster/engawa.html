@@ -69,6 +69,9 @@
   <script src="{% static 'js/jquery.bootstrap.modal.forms.js' %}"></script>
   <div class="your-auth">
     あなたは{{ role_name }}です
+    {% if player.gm_flag %}
+      このENGAWAへ再び出るためのURLは {{ request.scheme }}://{{ request.get_host }}/{{ engawa.uuid }}?p_code={{ player.p_code }} です。
+    {% endif %}
   </div>
   <div class="scenario-edit">
     <p class="scenario-name">シナリオ名：{{ engawa.scenario_name }}</p>

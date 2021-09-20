@@ -1,13 +1,14 @@
 import uuid, random, string
 from itertools import groupby
 from django.urls import reverse, reverse_lazy
+from django.core.mail import send_mail
 from django.http import Http404
 from django.http.response import HttpResponseRedirect
 from django.forms import fields, CheckboxInput
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import TemplateView, ListView
 from django.views.generic.detail import DetailView
-from django.views.generic.edit import CreateView, UpdateView
+from django.views.generic.edit import CreateView, FormView, UpdateView
 from django.contrib.auth import authenticate, login
 from bootstrap_modal_forms.generic import BSModalFormView
 from .mixins import LoginRequiredCustomMixin
@@ -60,28 +61,46 @@ def close_engawa(request):
 def after_close(request):
     return render(request, template_name="homaster/thanks.html")
 
-class IndexView(TemplateView):
+class IndexView(FormView):
     template_name = 'homaster/index.html'
+    form_class = IndexForm
 
-    def post(self, request):
-        data = request.POST
+    def form_valid(self, form):
+        scenario_name = form.cleaned_data["scenario_name"]
+        email = form.cleaned_data["email"]
 
         # ENGAWAのUUID払い出し
         e_uuid = uuid.uuid4()
         # ENGAWAを作成
-        Engawa.objects.create(uuid=e_uuid, scenario_name=data['scenario_name'])
+        Engawa.objects.create(uuid=e_uuid, scenario_name=scenario_name)
 
         # p_codeの払い出し
         code = ''.join(random.choices(string.ascii_lowercase + string.digits, k=8))
         # GMのPlayerレコードを登録
-        player, _ = Player.objects.get_or_create(engawa=Engawa(uuid=e_uuid), p_code=code, gm_flag=True)
+        player, _ = Player.objects.get_or_create(engawa=Engawa(uuid=e_uuid), p_code=code, gm_flag=True, email=email)
 
         # GMのログイン処理
-        login(request, player)
-        request.user = player
+        login(self.request, player)
+        self.request.user = player
 
         # 管理画面にリダイレクト
         return HttpResponseRedirect('engawa')
+
+class ReenterView(FormView):
+    template_name = 'homaster/reenter.html'
+    form_class = ReenterForm
+
+    def form_valid(self, form):
+        email = form.cleaned_data["email"]
+        accounts = Player.objects.filter(email=email, gm_flag=True)
+        message = "貴方がGMを担当するシナリオのENGAWAは以下のとおりです。\n"
+        for acc in accounts:
+            message += f"{acc.engawa.scenario_name}: http://{self.request.META.get('HTTP_HOST')}/{acc.engawa.uuid}?p_code={acc.p_code}\n"
+        subject = "test"
+        from_email = "tomono@example.com"
+        recipient_list = [email]
+        ret = send_mail(subject, message, from_email, recipient_list)
+        return redirect('homaster:reenter')
 
 class EngawaView(LoginRequiredCustomMixin, ListView):
     template_name = 'homaster/engawa.html'

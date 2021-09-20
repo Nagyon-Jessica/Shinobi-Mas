@@ -19,6 +19,7 @@ class Handout(models.Model):
     p_code = models.CharField(max_length=8, null=True, blank=True)
 
 class Player(AbstractBaseUser):
+    email = models.EmailField(verbose_name="メールアドレス", null=True, blank=True)
     engawa = models.ForeignKey(Engawa, on_delete=models.CASCADE)
     handout = models.OneToOneField(Handout, on_delete=models.CASCADE, null=True, blank=True)
     p_code = models.CharField(max_length=8)

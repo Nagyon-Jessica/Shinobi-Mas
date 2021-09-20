@@ -1,0 +1,16 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>ENGAWA再訪</title>
+  <link rel="icon" type="image/png" href="{% static 'favicon.ico' %}">
+</head>
+<body>
+  <form method="post">{% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="メールを送信する">
+  </form>
+  <a class="btn btn-secondary" href="{% url 'homaster:index' %}">戻る</a>
+</body>
+</html>
