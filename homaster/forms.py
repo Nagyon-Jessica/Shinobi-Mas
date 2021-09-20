@@ -35,6 +35,7 @@ class ReenterForm(forms.Form):
         accounts = Player.objects.filter(email=email, gm_flag=True)
         if not accounts:
             raise forms.ValidationError("このメールアドレスは登録されていません")
+        return email
 
 class HandoutTypeForm(BSModalForm):
     type = ChoiceField(
