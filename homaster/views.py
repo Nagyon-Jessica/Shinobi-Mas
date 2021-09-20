@@ -36,17 +36,21 @@ def signin(request, **kwargs):
 def delete(request):
     # ログインユーザがGMでなければエラー
     if not request.user.gm_flag:
+        print("PL!!")
         raise Http404("権限がありません")
 
     ho_id = request.GET.get('id')
+    print(ho_id)
     # 指定したIDのハンドアウトが存在しなければエラー
     handout = get_object_or_404(Handout, id=ho_id)
 
     # 他のENGAWAのハンドアウトを削除しようとしていたらエラー
     if handout.engawa != request.user.engawa:
+        print("ENGAWA違い！")
         raise Http404("権限がありません")
 
     handout.delete()
+    print("Delete!!")
     return HttpResponseRedirect('engawa')
 
 def close_engawa(request):
@@ -350,3 +354,21 @@ class InviteView(BSModalFormView):
         context['handout'] = handout
         context['invite_url'] = invite_url
         return context
+
+class ConfirmDeleteView(BSModalFormView):
+    template_name = 'homaster/delete_confirm_modal.html'
+    form_class = HandoutTypeForm
+
+    def get_context_data(self, **kwargs):
+        ho_id = self.request.GET.get('id')
+        handout = Handout.objects.get(id=ho_id)
+        ho_name = self.request.GET.get('name')
+        context = super().get_context_data(**kwargs)
+        context['handout'] = handout
+        context['ho_name'] = ho_name
+        return context
+
+    def post(self, request):
+        ho_id = request.GET.get('id')
+        redirect_url = reverse('homaster:delete') + f'?id={ho_id}'
+        return redirect(redirect_url)
