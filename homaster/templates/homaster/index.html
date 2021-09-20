@@ -1,15 +1,11 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="ja">
-
-<!-- ヘッダ -->
 <head>
   <meta charset="UTF-8">
   <title>Shinobi-Mas</title>
   <link rel="icon" type="image/png" href="{% static 'favicon.ico' %}">
 </head>
-
-<!-- 本文 -->
 <body>
   <div style="text-align:center;">
     <div style="height: 200px; padding: 100px;">
@@ -17,10 +13,11 @@
     </div>
     <div>
       <form method="post">{% csrf_token %}
-        <label for="scenario_name">シナリオ名を入力してください</label>
-        <input id="scenario_name" type="text" name="scenario_name" required>
+        {{ form.as_p }}
         <input type="submit" value="ENGAWAを設える">
+      </form>
     </div>
+    <a href="{% url 'homaster:reenter' %}">ENGAWAのURLを忘れてしまった場合はこちら</a>
   </div>
 </body>
 </html>
