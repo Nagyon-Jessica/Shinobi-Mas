@@ -363,12 +363,32 @@ class ConfirmDeleteView(BSModalFormView):
         ho_id = self.request.GET.get('id')
         handout = Handout.objects.get(id=ho_id)
         ho_name = self.request.GET.get('name')
+        submit_token = set_submit_token(self.request)
         context = super().get_context_data(**kwargs)
         context['handout'] = handout
         context['ho_name'] = ho_name
+        context['submit_token'] = submit_token
         return context
 
     def post(self, request):
+        if not exists_submit_token(request):
+            return redirect('homaster:engawa')
         ho_id = request.GET.get('id')
         redirect_url = reverse('homaster:delete') + f'?id={ho_id}'
         return redirect(redirect_url)
+
+def set_submit_token(request):
+    submit_token = str(uuid.uuid4())
+    request.session['submit_token'] = submit_token
+    return submit_token
+
+def exists_submit_token(request):
+    token_in_request = request.POST.get('submit_token')
+    token_in_session = request.session.pop('submit_token', '')
+
+    if not token_in_request:
+        return False
+    if not token_in_session:
+        return False
+
+    return token_in_request == token_in_session
