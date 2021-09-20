@@ -4,7 +4,7 @@ from django.urls import reverse, reverse_lazy
 from django.http import Http404
 from django.http.response import HttpResponseRedirect
 from django.forms import fields, CheckboxInput
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import TemplateView, ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView
@@ -51,8 +51,14 @@ def delete(request):
 
 def close_engawa(request):
     """使い終わったENGAWAを削除する"""
+    # ログインユーザがGMでなければエラー
+    if not request.user.gm_flag:
+        raise Http404("権限がありません")
     request.user.engawa.delete()
-    return redirect("homaster:index")
+    return redirect("homaster:close-success")
+
+def after_close(request):
+    return render(request, template_name="homaster/thanks.html")
 
 class IndexView(TemplateView):
     template_name = 'homaster/index.html'
@@ -259,6 +265,21 @@ class UpdateHandoutView(LoginRequiredCustomMixin, UpdateView):
             Auth.objects.filter(handout=ho_before).update(auth_front=(not ho_after.hidden))
         self.object = form.save()
         return HttpResponseRedirect(self.get_success_url())
+
+class ConfirmCloseView(BSModalFormView):
+    template_name = 'homaster/close_confirm_modal.html'
+    form_class = HandoutTypeForm
+
+    def get_context_data(self, **kwargs):
+        submit_token = set_submit_token(self.request)
+        context = super().get_context_data(**kwargs)
+        context['submit_token'] = submit_token
+        return context
+
+    def post(self, request):
+        if not exists_submit_token(request):
+            return redirect('homaster:close-success')
+        return redirect('homaster:close')
 
 class HandoutTypeChoiceView(BSModalFormView):
     template_name = 'homaster/type_choice_modal.html'

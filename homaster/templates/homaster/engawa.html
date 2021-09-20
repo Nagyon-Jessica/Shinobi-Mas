@@ -22,7 +22,7 @@
       text-align: start;
       font-size: 20px;
     }
-    .scenario-edit .scenario-del{
+    .scenario-edit .close-engawa{
       display: inline-block;
       text-align: end;
     }
@@ -73,7 +73,7 @@
   <div class="scenario-edit">
     <p class="scenario-name">シナリオ名：{{ engawa.scenario_name }}</p>
     {% if player.gm_flag %}
-      <a href="{% url 'homaster:close-engawa' %}" class="btn btn-danger scenario-del">ENGAWAを削除する</a>
+      <button id="close" class="btn btn-danger close-engawa">セッションを終了する</button>
     {% endif %}
   </div>
   {% if object_list %}
@@ -131,6 +131,10 @@
   const sleep = waitTime => new Promise( resolve => setTimeout(resolve, waitTime) );
 
   $(document).ready(function() {
+    $("#close").modalForm({
+        formURL: "{% url 'homaster:close-engawa' %}"
+    });
+
     $("#create-handout").modalForm({
         formURL: "{% url 'homaster:create-handout' %}"
     });
