@@ -36,21 +36,17 @@ def signin(request, **kwargs):
 def delete(request):
     # ログインユーザがGMでなければエラー
     if not request.user.gm_flag:
-        print("PL!!")
         raise Http404("権限がありません")
 
     ho_id = request.GET.get('id')
-    print(ho_id)
     # 指定したIDのハンドアウトが存在しなければエラー
     handout = get_object_or_404(Handout, id=ho_id)
 
     # 他のENGAWAのハンドアウトを削除しようとしていたらエラー
     if handout.engawa != request.user.engawa:
-        print("ENGAWA違い！")
         raise Http404("権限がありません")
 
     handout.delete()
-    print("Delete!!")
     return HttpResponseRedirect('engawa')
 
 def close_engawa(request):
