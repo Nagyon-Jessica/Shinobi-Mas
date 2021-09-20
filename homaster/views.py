@@ -99,7 +99,7 @@ class ReenterView(FormView):
         subject = "test"
         from_email = "tomono@example.com"
         recipient_list = [email]
-        ret = send_mail(subject, message, from_email, recipient_list)
+        send_mail(subject, message, from_email, recipient_list)
         return redirect('homaster:reenter')
 
 class EngawaView(LoginRequiredCustomMixin, ListView):
