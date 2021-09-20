@@ -1,0 +1,22 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+
+<!-- ヘッダ -->
+<head>
+  <meta charset="UTF-8">
+  <title>Shinobi-Mas</title>
+  <link rel="icon" type="image/png" href="{% static 'favicon.ico' %}">
+</head>
+
+<!-- 本文 -->
+<body>
+ご利用ありがとうございました！またのセッションをお待ちしております！<br>
+5秒後にトップページへ戻ります。
+</body>
+<script type="text/javascript">
+  setTimeout(function(){
+    window.location.href = "{% url 'homaster:index' %}";
+  }, 5*1000);
+</script>
+</html>

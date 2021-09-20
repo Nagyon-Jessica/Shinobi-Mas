@@ -1,0 +1,25 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>ハンドアウト詳細 - Shinobi-Mas</title>
+  <link rel="icon" type="image/png" href="{% static 'favicon.ico' %}">
+  <link rel="stylesheet" href="{% static 'assets/css/bootstrap.css' %}">
+</head>
+<body>
+  <script src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
+  <script src="{% static 'assets/js/bootstrap.js' %}"></script>
+  あなたは{{ role_name }}です<br>
+  ハンドアウト種別: {{ ho_type }}
+  <div>
+    {{ handout.pc_name|default_if_none:"（未指定）" }}
+    {{ handout.pl_name|default_if_none:"（未指定）" }}
+    {{ handout.front }}
+    {% if allowed %}
+    {{ handout.back }}
+    {% endif %}
+  </div>
+  <a class="btn btn-secondary" href="{{ request.META.HTTP_REFERER }}">戻る</a>
+  <br><br>
+</body>

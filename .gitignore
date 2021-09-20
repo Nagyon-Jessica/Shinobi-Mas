@@ -1,0 +1,7 @@
+__pycache__/
+static/
+.vscode/
+*.history
+*.pyc
+*.sqlite3
+local_settings.py
