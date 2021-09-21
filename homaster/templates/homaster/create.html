@@ -6,6 +6,7 @@
   <title>ハンドアウト作成 - Shinobi-Mas</title>
   <link rel="icon" type="image/png" href="{% static 'favicon.ico' %}">
   <link rel="stylesheet" href="{% static 'assets/css/bootstrap.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/css/shinobi-mas-common.css' %}">
   <link rel="stylesheet" href="{% static 'assets/css/shinobi-mas-ho-detail.css' %}">
   <script src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
   <script src="{% static 'assets/js/bootstrap.js' %}"></script>
@@ -13,7 +14,7 @@
 </head>
 <body>
   <div class="your-auth">
-    あなたは{{ role_name }}です
+    あなたは<strong>{{ role_name }}</strong>です。
   </div>
   <div class="ho-detail-form">
     <div class="ho-detail-type">
