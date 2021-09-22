@@ -1,3 +1,4 @@
+import logging
 from django import forms
 from django.core.mail import send_mail
 from django.forms.fields import CharField, ChoiceField, EmailField, MultipleChoiceField
@@ -19,7 +20,11 @@ class IndexForm(forms.Form):
             message = "sample"
             from_email = "tomono@example.com"
             recipient_list = [email]
-            ret = send_mail(subject, message, from_email, recipient_list)
+            try:
+                ret = send_mail(subject, message, from_email, recipient_list)
+            except Exception as e:
+                logging.exception("Cannot send an email.")
+                raise forms.ValidationError("メールを送信できませんでした。正しいメールアドレスを入力してください")
             if ret < 1:
                 raise forms.ValidationError("メールを送信できませんでした。正しいメールアドレスを入力してください")
         return email
