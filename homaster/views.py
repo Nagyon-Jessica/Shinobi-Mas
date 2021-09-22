@@ -95,7 +95,7 @@ class ReenterView(FormView):
         accounts = Player.objects.filter(email=email, gm_flag=True)
         message = "貴方がGMを担当するシナリオのENGAWAは以下のとおりです。\n"
         for acc in accounts:
-            message += f"{acc.engawa.scenario_name}: http://{self.request.META.get('HTTP_HOST')}/{acc.engawa.uuid}?p_code={acc.p_code}\n"
+            message += f"{acc.engawa.scenario_name}: https://{self.request.META.get('HTTP_HOST')}/{acc.engawa.uuid}?p_code={acc.p_code}\n"
         subject = "test"
         from_email = "tomono@example.com"
         recipient_list = [email]
@@ -382,7 +382,7 @@ class InviteView(BSModalFormView):
             handout.pl_name = "匿名プレイヤー"
 
         # 招待用URLを生成
-        invite_url = "http://" + \
+        invite_url = "https://" + \
             self.request.META.get("HTTP_HOST") + \
                 reverse('homaster:signin', kwargs={"uuid": handout.engawa.uuid}) + \
                     "?p_code=" + handout.p_code
