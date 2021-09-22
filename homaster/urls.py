@@ -1,4 +1,5 @@
 from django.urls import path
+from django.views.generic.base import RedirectView
 from . import views
 
 app_name = 'homaster'
@@ -18,4 +19,5 @@ urlpatterns = [
     path('delete-handout', views.ConfirmDeleteView.as_view(), name='delete-handout'),
     path('close-success', views.after_close, name='close-success'),
     path('<uuid>', views.signin, name='signin'),
+    path('', RedirectView.as_view(pattern_name="homaster:index")),
 ]
