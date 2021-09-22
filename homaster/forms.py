@@ -22,7 +22,7 @@ class IndexForm(forms.Form):
             recipient_list = [email]
             try:
                 ret = send_mail(subject, message, from_email, recipient_list)
-            except Exception as e:
+            except Exception:
                 logging.exception("Cannot send an email.")
                 raise forms.ValidationError("メールを送信できませんでした。正しいメールアドレスを入力してください")
             if ret < 1:

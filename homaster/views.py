@@ -1,4 +1,4 @@
-import uuid, random, string
+import uuid, random, string, logging
 from itertools import groupby
 from django.urls import reverse, reverse_lazy
 from django.core.mail import send_mail
@@ -20,24 +20,32 @@ def signin(request, **kwargs):
     if "p_code" in request.GET:
         p_code = request.GET.get("p_code")
     else:
+        logging.error("There is not p_code in query string.")
         return HttpResponseRedirect('index')
 
     # アクセスユーザの存在確認
-    player = authenticate(request, uuid=kwargs['uuid'], p_code=p_code)
+    uuid = kwargs['uuid']
+    player = authenticate(request, uuid=uuid, p_code=p_code)
     if player:
         # 存在するユーザならログイン
         login(request, player)
         request.user = player
     else:
         # ユーザが存在しなければトップページへリダイレクト
+        logging.error(f"There is not a player with p_code {p_code} in ENGAWA {uuid}")
         return HttpResponseRedirect('index')
     # ハンドアウト一覧画面へ遷移
     return HttpResponseRedirect('engawa')
 
 def delete(request):
+    # ログインしていなければトップページにリダイレクト
+    if not hasattr(request.user, "gm_flag"):
+        return redirect("homaster:index")
+
     # ログインユーザがGMでなければエラー
     if not request.user.gm_flag:
-        raise Http404("権限がありません")
+        logging.error(f"This player with p_code {request.user.p_code} is not GM.")
+        raise Http404()
 
     ho_id = request.GET.get('id')
     # 指定したIDのハンドアウトが存在しなければエラー
@@ -45,16 +53,22 @@ def delete(request):
 
     # 他のENGAWAのハンドアウトを削除しようとしていたらエラー
     if handout.engawa != request.user.engawa:
-        raise Http404("権限がありません")
+        logging.error(f"This player with p_code {request.user.p_code} cannot delete a handout(ID: {handout.id}) of other ENGAWA.")
+        raise Http404()
 
     handout.delete()
     return HttpResponseRedirect('engawa')
 
 def close_engawa(request):
     """使い終わったENGAWAを削除する"""
+    # ログインしていなければトップページにリダイレクト
+    if not hasattr(request.user, "gm_flag"):
+        return redirect("homaster:index")
+
     # ログインユーザがGMでなければエラー
     if not request.user.gm_flag:
-        raise Http404("権限がありません")
+        logging.error(f"This player with p_code {request.user.p_code} is not GM.")
+        raise Http404()
     request.user.engawa.delete()
     return redirect("homaster:close-success")
 
@@ -99,7 +113,10 @@ class ReenterView(FormView):
         subject = "test"
         from_email = "tomono@example.com"
         recipient_list = [email]
-        send_mail(subject, message, from_email, recipient_list)
+        try:
+            send_mail(subject, message, from_email, recipient_list)
+        except Exception:
+            logging.exception("Cannot send an email.")
         return redirect('homaster:reenter')
 
 class EngawaView(LoginRequiredCustomMixin, ListView):
@@ -152,7 +169,8 @@ class CreateHandoutView(LoginRequiredCustomMixin, CreateView):
 
     def get(self, request, *args, **kwargs):
         if not request.user.gm_flag:
-            raise Http404("権限がありません")
+            logging.error(f"This player with p_code {request.user.p_code} is not GM.")
+            raise Http404()
         # クエリパラメータが不正の場合，自動で"1"とする
         if self.request.GET.get("type", default=None) not in ["1", "2", "3"]:
             return redirect('/create?type=1')
@@ -251,7 +269,8 @@ class UpdateHandoutView(LoginRequiredCustomMixin, UpdateView):
 
     def get(self, request, *args, **kwargs):
         if not request.user.gm_flag:
-            raise Http404("権限がありません")
+            logging.error(f"This player with p_code {request.user.p_code} is not GM.")
+            raise Http404()
         ho_id = kwargs['pk']
         get_object_or_404(Handout, engawa=request.user.engawa, id=ho_id)
         return super().get(request, *args, **kwargs)
