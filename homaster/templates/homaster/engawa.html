@@ -42,7 +42,7 @@
           <td class="ho-table-name">{{ handout.pc_name|default_if_none:"（未指定）" }}</td>
           <td class="ho-table-front" rowspan="2">{{ handout.front }}</td>
         </tr>
-        <tr>
+        <tr class="ho-table-tanzaku">
           <td class="ho-table-edit">
             {% if player.gm_flag %}
             <a href="{% url 'homaster:update' handout.id %}" class="text-dark" title="編集">

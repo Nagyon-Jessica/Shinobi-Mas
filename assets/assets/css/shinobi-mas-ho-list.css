@@ -11,23 +11,25 @@
 }
 .ho-list{
   clear: both;
+  width: 1100px;
+  margin: 0px auto;
 }
 .ho-table{
-  width: 1100px;
-  margin: 10px auto;
+  width: 1080px;
+  margin: 0px auto;
 }
 .ho-table .ho-table-tanzaku{
-  width: 1050px;
+  width: 1075px;
 }
 .ho-table .ho-table-tanzaku .ho-table-id{
-  width: 100px;
+  width: 125px;
   text-align: center;
   vertical-align: middle;
-  font-size: 32px;
+  font-size: 36px;
   font-weight: bold;
 }
 .ho-table .ho-table-tanzaku .ho-table-edit{
-  width: 100px;
+  width: 125px;
   text-align: center;
   vertical-align: middle;
 }
@@ -40,5 +42,5 @@
   vertical-align: middle;
 }
 .ho-table .ho-table-tanzaku .ho-table-front{
-  width: 600px;
+  width: 750px;
 }
