@@ -397,8 +397,6 @@ class AuthControlView(BSModalFormView):
                     kwargs['auth_front'] = True
             # 権限の変更があればDBを更新し，対象PLにプッシュ通知を送信
             if kwargs != auth.orig_auth:
-                print(kwargs)
-                print(auth.orig_auth)
                 Auth.objects.filter(id=int(choice[0])).update(**kwargs)
                 send_push(auth, ho_names[str(auth.handout.id)])
         return redirect("homaster:engawa")
@@ -469,6 +467,8 @@ def exists_submit_token(request):
 
 def send_push(auth, ho_name):
     player = auth.player
-    print(player.id)
     payload = {'head': f'{ho_name}への閲覧権限が更新されました', 'body': '画面を再読込してください'}
-    send_user_notification(user=player, payload=payload, ttl=1000)
+    try:
+        send_user_notification(user=player, payload=payload, ttl=1000)
+    except Exception:
+        logging.exception("Failed to send Webpush.")
