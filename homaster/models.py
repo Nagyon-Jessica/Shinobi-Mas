@@ -37,3 +37,7 @@ class Auth(models.Model):
     handout = models.ForeignKey(Handout, on_delete=models.CASCADE)
     auth_front = models.BooleanField()
     auth_back = models.BooleanField()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.orig_auth = {"auth_front": self.auth_front, "auth_back": self.auth_back}

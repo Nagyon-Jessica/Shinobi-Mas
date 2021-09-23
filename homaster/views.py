@@ -1,16 +1,19 @@
-import uuid, random, string, logging
+import uuid, random, string, logging, json
 from itertools import groupby
+from collections import OrderedDict
 from django.urls import reverse, reverse_lazy
 from django.core.mail import send_mail
+from django.conf import settings
 from django.http import Http404
 from django.http.response import HttpResponseRedirect
 from django.forms import fields, CheckboxInput
 from django.shortcuts import get_object_or_404, redirect, render
-from django.views.generic import TemplateView, ListView
+from django.views.generic import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, FormView, UpdateView
 from django.contrib.auth import authenticate, login
 from bootstrap_modal_forms.generic import BSModalFormView
+from webpush import send_user_notification
 from .mixins import LoginRequiredCustomMixin
 from .models import *
 from .forms import *
@@ -147,13 +150,13 @@ class EngawaView(LoginRequiredCustomMixin, ListView):
         # 表示するハンドアウトが存在する場合，ハンドアウト名リストを生成
         # ユーザがGMでない場合，ハンドアウト名を紐付けた後で非公開ハンドアウトを除外
         if context['object_list']:
-            ho_names = []
+            ho_names = OrderedDict()
             for t, hos in groupby(context['object_list'], key=lambda x: x.type):
                 type = HANDOUT_TYPE_DICT[str(t)]
-                for i in range(len(list(hos))):
-                    ho_names.append(type + str(i + 1))
+                for i, ho in enumerate(hos):
+                    ho_names[str(ho.id)] = (type + str(i + 1))
             self.request.session['ho_names'] = ho_names
-            for i, ho_name in enumerate(ho_names):
+            for i, (_, ho_name) in enumerate(ho_names.items()):
                 context['object_list'][i].ho_name = ho_name
             if not self.request.user.gm_flag:
                 auths = Auth.objects.filter(player=self.request.user, auth_front=True)
@@ -337,9 +340,11 @@ class AuthControlView(BSModalFormView):
         ho_name = self.request.GET.get('name')
         ho_id = self.request.GET.get('id')
         handout = Handout.objects.get(id=ho_id)
+        submit_token = set_submit_token(self.request)
         context = super().get_context_data(**kwargs)
         context['ho_name'] = ho_name
         context['pc_name'] = handout.pc_name
+        context['submit_token'] = submit_token
         return context
 
     def get_form(self):
@@ -352,32 +357,34 @@ class AuthControlView(BSModalFormView):
         choices_back = []
         if handout.hidden:
             # 非公開＝NPC/HOなので自身を含む場合を考慮する必要なし
-            for i, auth in enumerate(auths):
+            for auth in auths:
                 pc_name = auth.player.handout.pc_name
                 if not pc_name:
                     pc_name = "未指定"
-                choices_front.append((str(auth.id), f"{ho_names[i]}({pc_name})"))
-                choices_back.append((str(auth.id), f"{ho_names[i]}({pc_name})"))
+                choices_front.append((str(auth.id), f"{ho_names[str(auth.player.handout.id)]}({pc_name})"))
+                choices_back.append((str(auth.id), f"{ho_names[str(auth.player.handout.id)]}({pc_name})"))
             form.fields['auth_front'].choices = tuple(choices_front)
             form.fields['auth_front'].initial = [a.id for a in auths if a.auth_front]
             form.fields['auth_back'].choices = tuple(choices_back)
             form.fields['auth_back'].initial = [a.id for a in auths if a.auth_back]
         else:
             del form.fields['auth_front']
-            for i, auth in enumerate(auths):
+            for auth in auths:
                 # PCの場合自身を選択肢に含めない
                 if auth.handout.id != auth.player.handout.id:
                     pc_name = auth.player.handout.pc_name
                     if not pc_name:
                         pc_name = "未指定"
-                    choices_back.append((str(auth.id), f"{ho_names[i]}({pc_name})"))
+                    choices_back.append((str(auth.id), f"{ho_names[str(auth.player.handout.id)]}({pc_name})"))
             form.fields['auth_back'].choices = tuple(choices_back)
             form.fields['auth_back'].initial = [a.id for a in auths if a.handout.id != a.player.handout.id and a.auth_back]
         return form
 
     def form_valid(self, form):
         choices = form.fields['auth_back']._choices
+        ho_names = self.request.session['ho_names']
         for choice in choices:
+            auth = Auth.objects.get(id=int(choice[0]))
             kwargs = {}
             # 裏が公開なら自動的に表も公開と決まる
             if choice[0] in self.request.POST.getlist("auth_back"):
@@ -386,8 +393,20 @@ class AuthControlView(BSModalFormView):
                 kwargs['auth_back'] = False
                 if 'auth_front' in form.fields.keys():
                     kwargs['auth_front'] = choice[0] in self.request.POST.getlist("auth_front")
-            Auth.objects.filter(id=int(choice[0])).update(**kwargs)
+                else:
+                    kwargs['auth_front'] = True
+            # 権限の変更があればDBを更新し，対象PLにプッシュ通知を送信
+            if kwargs != auth.orig_auth:
+                print(kwargs)
+                print(auth.orig_auth)
+                Auth.objects.filter(id=int(choice[0])).update(**kwargs)
+                send_push(auth, ho_names[str(auth.handout.id)])
         return redirect("homaster:engawa")
+
+    def post(self, request):
+        if not exists_submit_token(request):
+            return redirect('homaster:engawa')
+        return super().post(request)
 
 class InviteView(BSModalFormView):
     template_name = 'homaster/invite_modal.html'
@@ -447,3 +466,9 @@ def exists_submit_token(request):
         return False
 
     return token_in_request == token_in_session
+
+def send_push(auth, ho_name):
+    player = auth.player
+    print(player.id)
+    payload = {'head': f'{ho_name}への閲覧権限が更新されました', 'body': '画面を再読込してください'}
+    send_user_notification(user=player, payload=payload, ttl=1000)
