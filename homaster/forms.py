@@ -18,7 +18,7 @@ class IndexForm(forms.Form):
         if email:
             subject = "test"
             message = "sample"
-            from_email = "tomono@example.com"
+            from_email = "shinobimas.master@gmail.com"
             recipient_list = [email]
             try:
                 ret = send_mail(subject, message, from_email, recipient_list)
