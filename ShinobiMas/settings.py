@@ -209,12 +209,6 @@ STATIC_URL = '/static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-WEBPUSH_SETTINGS = {
-    "VAPID_PUBLIC_KEY": "BNYTz3FBz6KfOfVJSLyPsMm_lXQgsdS77kEpTy65A1vUDuimC7euCA_QEw_IJnJ-QYIwCV-YEqAtuStoWd3-3yc",
-    "VAPID_PRIVATE_KEY": os.environ['VAPID_PRIVATE_KEY'],
-    "VAPID_ADMIN_EMAIL": os.environ['VAPID_ADMIN_EMAIL'],
-}
-
 # Activate Django-Heroku.
 django_heroku.settings(locals())
 
@@ -225,3 +219,9 @@ except ImportError:
 
 if not DEBUG:
     SECRET_KEY = os.environ['SECRET_KEY']
+
+    WEBPUSH_SETTINGS = {
+        "VAPID_PUBLIC_KEY": "BNYTz3FBz6KfOfVJSLyPsMm_lXQgsdS77kEpTy65A1vUDuimC7euCA_QEw_IJnJ-QYIwCV-YEqAtuStoWd3-3yc",
+        "VAPID_PRIVATE_KEY": os.environ['VAPID_PRIVATE_KEY'],
+        "VAPID_ADMIN_EMAIL": os.environ['VAPID_ADMIN_EMAIL'],
+    }
