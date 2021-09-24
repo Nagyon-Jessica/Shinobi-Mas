@@ -1,6 +1,6 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
   <meta charset="utf-8">
   <meta name="user_id" content="{{ player.id }}">
@@ -10,71 +10,74 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
   <link rel="stylesheet" href="{% static 'assets/css/shinobi-mas-common.css' %}">
   <link rel="stylesheet" href="{% static 'assets/css/shinobi-mas-ho-list.css' %}">
-</head>
-<body>
   <script src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
   <script src="{% static 'assets/js/bootstrap.bundle.js' %}"></script>
   <script src="{% static 'js/jquery.bootstrap.modal.forms.js' %}"></script>
-  <div class="your-auth">
+  <script src="{% static 'assets/js/sw_main.js' %}" type="text/javascript"></script>
+</head>
+<body>
+  <header class="header fixed-top your-auth">
     あなたは<strong>{{ role_name }}</strong>です。
     {% if player.gm_flag %}
     このENGAWAへ再び出るためのURLは {{ request.scheme }}://{{ request.get_host }}/{{ engawa.uuid }}?p_code={{ player.p_code }} です。
     {% endif %}
-  </div>
-  <div class="scenario-edit">
-    <p class="scenario-name">シナリオ名：{{ engawa.scenario_name }}</p>
-    {% if player.gm_flag %}
-    <span class="edit-engawa">
-      <button id="create-handout" class="btn" type="button">ハンドアウトを追加する</button>
-      <button id="close" class="btn btn-danger">セッションを終了する</button>
-    </span>
-    {% endif %}
-  </div>
-  {% if object_list %}
-  <div class="list-group ho-list">
-  {% for handout in object_list %}
-    <ul class="list-group-item" hoid="{{ handout.id }}" honame="{{ handout.ho_name }}">
-      <table class="ho-table">
-        <tr class="ho-table-tanzaku">
-          <td class="ho-table-id">
-            <a href="{% url 'homaster:detail' handout.id %}">{{ handout.ho_name }}</a>
-          </td>
-          <td class="ho-table-name-type">PC名:</td>
-          <td class="ho-table-name">{{ handout.pc_name|default_if_none:"（未指定）" }}</td>
-          <td class="ho-table-front" rowspan="2">{{ handout.front }}</td>
-        </tr>
-        <tr class="ho-table-tanzaku">
-          <td class="ho-table-edit">
-            {% if player.gm_flag %}
-            <a href="{% url 'homaster:update' handout.id %}" class="text-dark" title="編集">
-              <i class="far fa-edit"></i>
-            </a>
-            <span class="auth-control text-dark" title="閲覧権限管理">
-              <i class="far fa-eye"></i>
-            </span>
-            {% if handout.type == 1 %}
-            <span class="invite text-dark" title="プレイヤー招待">
-              <i class="fas fa-user-plus"></i>
-            </span>
-            {% endif %}
-            <span class="delete text-dark" title="削除">
-              <i class="far fa-trash-alt"></i>
-            </span>
-            {% endif %}
-          </td>
-          <td class="ho-table-name-type">PL名:</td>
-          <td class="ho-table-name">{{ handout.pl_name|default_if_none:"（未指定）" }}</td>
-        </tr>
-      </table>
-    </ul>
-  {% endfor %}
-  </div>
-  {% endif %}
-  <div class="modal fade" tabindex="-1" role="dialog" id="modal">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content"></div>
+  </header>
+  <main class="main main-wrapper">
+    <div class="scenario-edit">
+      <p class="scenario-name">シナリオ名：{{ engawa.scenario_name }}</p>
+      {% if player.gm_flag %}
+      <span class="edit-engawa">
+        <button id="create-handout" class="btn" type="button">ハンドアウトを追加する</button>
+        <button id="close" class="btn btn-danger">セッションを終了する</button>
+      </span>
+      {% endif %}
     </div>
-  </div>
+    {% if object_list %}
+    <div class="list-group ho-list">
+    {% for handout in object_list %}
+      <ul class="list-group-item" hoid="{{ handout.id }}" honame="{{ handout.ho_name }}">
+        <table class="ho-table">
+          <tr class="ho-table-tanzaku">
+            <td class="ho-table-id">
+              <a href="{% url 'homaster:detail' handout.id %}">{{ handout.ho_name }}</a>
+            </td>
+            <td class="ho-table-name-type">PC名:</td>
+            <td class="ho-table-name">{{ handout.pc_name|default_if_none:"（未指定）" }}</td>
+            <td class="ho-table-front" rowspan="2">{{ handout.front }}</td>
+          </tr>
+          <tr class="ho-table-tanzaku">
+            <td class="ho-table-edit">
+              {% if player.gm_flag %}
+              <a href="{% url 'homaster:update' handout.id %}" class="text-dark" title="編集">
+                <i class="far fa-edit"></i>
+              </a>
+              <span class="auth-control text-dark" title="閲覧権限管理">
+                <i class="far fa-eye"></i>
+              </span>
+              {% if handout.type == 1 %}
+              <span class="invite text-dark" title="プレイヤー招待">
+                <i class="fas fa-user-plus"></i>
+              </span>
+              {% endif %}
+              <span class="delete text-dark" title="削除">
+                <i class="far fa-trash-alt"></i>
+              </span>
+              {% endif %}
+            </td>
+            <td class="ho-table-name-type">PL名:</td>
+            <td class="ho-table-name">{{ handout.pl_name|default_if_none:"（未指定）" }}</td>
+          </tr>
+        </table>
+      </ul>
+    {% endfor %}
+    </div>
+    {% endif %}
+    <div class="modal fade" tabindex="-1" role="dialog" id="modal">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content"></div>
+      </div>
+    </div>
+  </main>
   <footer class="footer fixed-bottom">
     <div class="container">
       <p class="text-muted text-center">
@@ -84,7 +87,6 @@
     </div>
   </footer>
 </body>
-<script src="{% static 'assets/js/sw_main.js' %}" type="text/javascript"></script>
 <script type="text/javascript">
   const sleep = waitTime => new Promise( resolve => setTimeout(resolve, waitTime) );
 
