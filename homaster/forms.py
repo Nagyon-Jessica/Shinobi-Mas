@@ -15,13 +15,21 @@ class IndexForm(forms.Form):
 
     def clean_email(self):
         email = self.cleaned_data['email']
+        scenario_name = self.cleaned_data['scenario_name']
         if email:
-            subject = "test"
-            message = "sample"
+            subject = "【Shinobo-Mas】登録完了のお知らせ"
+            message = f"貴方をシナリオ【{scenario_name}】のGMとして登録いたしました！\n\n"\
+                      "シナリオのENGAWAへ再び出るためのURLを忘れてしまった場合は，\n"\
+                      "トップページの「ENGAWAのURLを忘れてしまった場合はこちら」を\n"\
+                      "クリックし，フォームにご登録いただいたメールアドレスを入力いただくと\n"\
+                      "システムからメールにてURLを通知させていただきます。\n\n"\
+                      "引き続きShinobi-Masをよろしくお願いいたします。\n\n"\
+                      "※ このメールに心あたりがない場合は、第三者がメールアドレスの入力を誤った可能性があります。\n"\
+                      "その際は、大変お手数ではございますが、メールを破棄していただきますようにお願いいたします。"
             from_email = "shinobimas.master@gmail.com"
             recipient_list = [email]
             try:
-                ret = send_mail(subject, message, from_email, recipient_list)
+                ret = send_mail(subject, message, from_email, recipient_list, fail_silently=False)
             except Exception:
                 logging.exception("Cannot send an email.")
                 raise forms.ValidationError("メールを送信できませんでした。正しいメールアドレスを入力してください")

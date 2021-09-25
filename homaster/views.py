@@ -110,11 +110,14 @@ class ReenterView(FormView):
     def form_valid(self, form):
         email = form.cleaned_data["email"]
         accounts = Player.objects.filter(email=email, gm_flag=True)
-        message = "貴方がGMを担当するシナリオのENGAWAは以下のとおりです。\n"
+        message = "貴方がGMを担当するシナリオのENGAWAは以下のとおりです。\n\n"
         for acc in accounts:
             message += f"{acc.engawa.scenario_name}: https://{self.request.META.get('HTTP_HOST')}/{acc.engawa.uuid}?p_code={acc.p_code}\n"
-        subject = "test"
-        from_email = "tomono@example.com"
+        message += "\n引き続きセッションをお楽しみください！\n\n"\
+                   "※ このメールに心あたりがない場合は、第三者がメールアドレスの入力を誤った可能性があります。\n"\
+                   "その際は、大変お手数ではございますが、メールを破棄していただきますようにお願いいたします。"
+        subject = "【Shinobi-Mas】ENGAWA再訪URLのご通知"
+        from_email = "shinobimas.master@gmail.com"
         recipient_list = [email]
         try:
             send_mail(subject, message, from_email, recipient_list)
