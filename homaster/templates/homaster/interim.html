@@ -1,0 +1,29 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>仮登録完了</title>
+  <link rel="icon" type="image/png" href="{% static 'favicon.ico' %}">
+  <link rel="stylesheet" href="{% static 'assets/css/bootstrap.css' %}">
+</head>
+<body>
+  <div class="text-center">
+      メールアドレスの仮登録が完了しました。<br>
+      ENGAWAに出るためにはメールボックスを確認し，<br>
+      「仮登録完了のお知らせ」メールに記載されている本登録URLへアクセスしてください。<br><br>
+      しばらくしてもメールが届かない場合は，入力したアドレスが正確でないか，<br>
+      @gmail.comからのメールを受け取れない設定になっている可能性があります。<br>
+      そちらをご確認の上，操作をやり直してください。
+  </div>
+  <a class="btn btn-secondary text-center" href="{% url 'homaster:index' %}">戻る</a>
+</body>
+<footer class="footer fixed-bottom">
+  <div class="container">
+    <p class="text-muted text-center">
+      © 2021 Shinobi-Mas<br>
+      お問い合わせはこちら→ shinobimas.master@gmail.com
+    </p>
+  </div>
+</footer>
+</html>

@@ -18,14 +18,14 @@
 <body>
   <header class="header fixed-top your-auth">
     あなたは<strong>{{ role_name }}</strong>です。
-    {% if player.gm_flag %}
+    {% if player.is_gm %}
     このENGAWAへ再び出るためのURLは {{ request.scheme }}://{{ request.get_host }}/{{ engawa.uuid }}?p_code={{ player.p_code }} です。
     {% endif %}
   </header>
   <main class="main main-wrapper">
     <div class="scenario-edit">
       <p class="scenario-name">シナリオ名：{{ engawa.scenario_name }}</p>
-      {% if player.gm_flag %}
+      {% if player.is_gm %}
       <span class="edit-engawa">
         <button id="create-handout" class="btn" type="button">ハンドアウトを追加する</button>
         <button id="close" class="btn btn-danger">セッションを終了する</button>
@@ -47,7 +47,7 @@
           </tr>
           <tr class="ho-table-tanzaku">
             <td class="ho-table-edit">
-              {% if player.gm_flag %}
+              {% if player.is_gm %}
               <a href="{% url 'homaster:update' handout.id %}" class="text-dark" title="編集">
                 <i class="far fa-edit"></i>
               </a>
