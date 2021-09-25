@@ -5,7 +5,6 @@ from django.urls import reverse, reverse_lazy
 from django.core.mail import send_mail
 from django.conf import settings
 from django.http import Http404
-from django.http.response import HttpResponseRedirect
 from django.forms import fields, CheckboxInput
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import ListView
@@ -24,29 +23,49 @@ def signin(request, **kwargs):
         p_code = request.GET.get("p_code")
     else:
         logging.error("There is not p_code in query string.")
-        return HttpResponseRedirect('index')
+        return redirect('homaster:index')
 
     # アクセスユーザの存在確認
     uuid = kwargs['uuid']
     player = authenticate(request, uuid=uuid, p_code=p_code)
     if player:
+        # 仮登録のGMの場合，正式登録を行う
+        if player.role == 2:
+            engawa = Engawa.objects.get(uuid=uuid)
+            Player.objects.filter(engawa=engawa, p_code=p_code).update(role=1)
+            # 正式登録完了メールの送信
+            subject = "【Shinobo-Mas】登録完了のお知らせ"
+            message = f"貴方をシナリオ【{engawa.scenario_name}】のGMとして登録いたしました！\n\n"\
+                      "シナリオのENGAWAへ再び出るためのURLを忘れてしまった場合は，\n"\
+                      "トップページの「ENGAWAのURLを忘れてしまった場合はこちら」を\n"\
+                      "クリックし，フォームにご登録いただいたメールアドレスを入力いただくと\n"\
+                      "システムからメールにてURLを通知させていただきます。\n\n"\
+                      "引き続きShinobi-Masをよろしくお願いいたします。\n\n"\
+                      "※ このメールに心あたりがない場合は、第三者がメールアドレスの入力を誤った可能性があります。\n"\
+                      "その際は、大変お手数ではございますが、メールを破棄していただきますようにお願いいたします。"
+            from_email = "shinobimas.master@gmail.com"
+            recipient_list = [player.email]
+            try:
+                send_mail(subject, message, from_email, recipient_list, fail_silently=False)
+            except Exception:
+                logging.exception(f"Cannot send an email to {player.email}.")
         # 存在するユーザならログイン
         login(request, player)
         request.user = player
     else:
         # ユーザが存在しなければトップページへリダイレクト
         logging.error(f"There is not a player with p_code {p_code} in ENGAWA {uuid}")
-        return HttpResponseRedirect('index')
+        return redirect('homaster:index')
     # ハンドアウト一覧画面へ遷移
-    return HttpResponseRedirect('engawa')
+    return redirect('homaster:engawa')
 
 def delete(request):
     # ログインしていなければトップページにリダイレクト
-    if not hasattr(request.user, "gm_flag"):
+    if not hasattr(request.user, "role"):
         return redirect("homaster:index")
 
     # ログインユーザがGMでなければエラー
-    if not request.user.gm_flag:
+    if not request.user.is_gm:
         logging.error(f"This player with p_code {request.user.p_code} is not GM.")
         raise Http404()
 
@@ -60,16 +79,16 @@ def delete(request):
         raise Http404()
 
     handout.delete()
-    return HttpResponseRedirect('engawa')
+    return redirect('homaster:engawa')
 
 def close_engawa(request):
     """使い終わったENGAWAを削除する"""
     # ログインしていなければトップページにリダイレクト
-    if not hasattr(request.user, "gm_flag"):
+    if not hasattr(request.user, "role"):
         return redirect("homaster:index")
 
     # ログインユーザがGMでなければエラー
-    if not request.user.gm_flag:
+    if not request.user.is_gm:
         logging.error(f"This player with p_code {request.user.p_code} is not GM.")
         raise Http404()
     request.user.engawa.delete()
@@ -78,6 +97,9 @@ def close_engawa(request):
 def after_close(request):
     return render(request, template_name="homaster/thanks.html")
 
+def interim(request):
+    return render(request, template_name="homaster/interim.html")
+
 class IndexView(FormView):
     template_name = 'homaster/index.html'
     form_class = IndexForm
@@ -85,6 +107,9 @@ class IndexView(FormView):
     def form_valid(self, form):
         scenario_name = form.cleaned_data["scenario_name"]
         email = form.cleaned_data["email"]
+        if email:
+            # 入力されたメールアドレスを持った正式登録済みのGMが既に存在するか
+            exist = Player.objects.filter(email=email, role=1).exists()
 
         # ENGAWAのUUID払い出し
         e_uuid = uuid.uuid4()
@@ -93,15 +118,57 @@ class IndexView(FormView):
 
         # p_codeの払い出し
         code = ''.join(random.choices(string.ascii_lowercase + string.digits, k=8))
+
+        role = 2 if email and not exist else 1
+
         # GMのPlayerレコードを登録
-        player, _ = Player.objects.get_or_create(engawa=Engawa(uuid=e_uuid), p_code=code, gm_flag=True, email=email)
+        player, _ = Player.objects.get_or_create(engawa=Engawa(uuid=e_uuid), p_code=code, role=role, email=email)
 
-        # GMのログイン処理
-        login(self.request, player)
-        self.request.user = player
+        if not email:
+            # GMのログイン処理
+            login(self.request, player)
+            self.request.user = player
+            # 管理画面にリダイレクト
+            return redirect('homaster:engawa')
+        elif exist:
+            # 正式登録完了メールの送信
+            subject = "【Shinobo-Mas】登録完了のお知らせ"
+            message = f"貴方をシナリオ【{scenario_name}】のGMとして登録いたしました！\n\n"\
+                      "シナリオのENGAWAへ再び出るためのURLを忘れてしまった場合は，\n"\
+                      "トップページの「ENGAWAのURLを忘れてしまった場合はこちら」を\n"\
+                      "クリックし，フォームにご登録いただいたメールアドレスを入力いただくと\n"\
+                      "システムからメールにてURLを通知させていただきます。\n\n"\
+                      "引き続きShinobi-Masをよろしくお願いいたします。\n\n"\
+                      "※ このメールに心あたりがない場合は、第三者がメールアドレスの入力を誤った可能性があります。\n"\
+                      "その際は、大変お手数ではございますが、メールを破棄していただきますようにお願いいたします。"
+            from_email = "shinobimas.master@gmail.com"
+            recipient_list = [player.email]
+            try:
+                send_mail(subject, message, from_email, recipient_list, fail_silently=False)
+            except Exception:
+                logging.exception(f"Cannot send an email to {player.email}.")
 
-        # 管理画面にリダイレクト
-        return HttpResponseRedirect('engawa')
+            # GMのログイン処理
+            login(self.request, player)
+            self.request.user = player
+
+            # 管理画面にリダイレクト
+            return redirect('homaster:engawa')
+        else:
+            subject = "【Shinobo-Mas】仮登録完了のお知らせ"
+            message = f"貴方をシナリオ【{scenario_name}】のGMとして仮登録いたしました！\n\n"\
+                      "以下のURLより本登録を完了させてください。\n\n"\
+                      f"https://{self.request.META.get('HTTP_HOST')}/{e_uuid}?p_code={code}\n\n"\
+                      "※ このメールに心あたりがない場合は、第三者がメールアドレスの入力を誤った可能性があります。\n"\
+                      "その際は、大変お手数ではございますが、メールを破棄していただきますようにお願いいたします。"
+            from_email = "shinobimas.master@gmail.com"
+            recipient_list = [email]
+            try:
+                send_mail(subject, message, from_email, recipient_list, fail_silently=False)
+            except Exception:
+                logging.exception(f"Cannot send an email to {email}.")
+            # 仮登録完了画面にリダイレクト
+            return redirect("homaster:interim")
 
 class ReenterView(FormView):
     template_name = 'homaster/reenter.html'
@@ -109,7 +176,7 @@ class ReenterView(FormView):
 
     def form_valid(self, form):
         email = form.cleaned_data["email"]
-        accounts = Player.objects.filter(email=email, gm_flag=True)
+        accounts = Player.objects.filter(email=email, role=1)
         message = "貴方がGMを担当するシナリオのENGAWAは以下のとおりです。\n\n"
         for acc in accounts:
             message += f"{acc.engawa.scenario_name}: https://{self.request.META.get('HTTP_HOST')}/{acc.engawa.uuid}?p_code={acc.p_code}\n"
@@ -140,7 +207,7 @@ class EngawaView(LoginRequiredCustomMixin, ListView):
         context["engawa"] = engawa
         context['player'] = player
         # プレイヤーのロール名(GM/PCx)を判定
-        if player.gm_flag:
+        if player.is_gm:
             role_name = "GM"
         else:
             # ENGAWAに所属するplayerのリスト
@@ -161,7 +228,7 @@ class EngawaView(LoginRequiredCustomMixin, ListView):
             self.request.session['ho_names'] = ho_names
             for i, (_, ho_name) in enumerate(ho_names.items()):
                 context['object_list'][i].ho_name = ho_name
-            if not self.request.user.gm_flag:
+            if not self.request.user.is_gm:
                 auths = Auth.objects.filter(player=self.request.user, auth_front=True)
                 allowed_ho_ids = list(map(lambda a: a.handout.id, auths))
                 context['object_list'] = list(filter(lambda h: h.id in allowed_ho_ids, context['object_list']))
@@ -174,7 +241,7 @@ class CreateHandoutView(LoginRequiredCustomMixin, CreateView):
     success_url = reverse_lazy("homaster:engawa")
 
     def get(self, request, *args, **kwargs):
-        if not request.user.gm_flag:
+        if not request.user.is_gm:
             logging.error(f"This player with p_code {request.user.p_code} is not GM.")
             raise Http404()
         # クエリパラメータが不正の場合，自動で"1"とする
@@ -220,7 +287,7 @@ class CreateHandoutView(LoginRequiredCustomMixin, CreateView):
 
         # PCを作成する場合，紐づくPLと，そのPLの既存ハンドアウトに対する権限レコードを作成する
         if is_pc:
-            player, _ = Player.objects.get_or_create(engawa=engawa, handout=self.object, p_code=code, gm_flag=False)
+            player, _ = Player.objects.get_or_create(engawa=engawa, handout=self.object, p_code=code, role=0)
             handouts = Handout.objects.filter(engawa=engawa)
             for ho in handouts:
                 if ho == self.object:
@@ -228,7 +295,7 @@ class CreateHandoutView(LoginRequiredCustomMixin, CreateView):
                 Auth.objects.create(player=player, handout=ho, auth_front=bool(not ho.hidden), auth_back=False)
 
         # PLが存在する場合，作成するハンドアウトについてのAuthレコードを作成する
-        players = Player.objects.filter(engawa=engawa, gm_flag=False)
+        players = Player.objects.filter(engawa=engawa, role=0)
         is_hidden = getattr(handout, 'hidden', False)
         if is_pc:
             # PCの場合，PLがハンドアウトの所有者の時のみ裏を公開
@@ -240,7 +307,7 @@ class CreateHandoutView(LoginRequiredCustomMixin, CreateView):
             for pl in players:
                 Auth.objects.create(player=pl, handout=self.object, auth_front=(not is_hidden), auth_back=False)
 
-        return HttpResponseRedirect(self.get_success_url())
+        return redirect(self.get_success_url())
 
 class HandoutDetailView(LoginRequiredCustomMixin, DetailView):
     template_name = 'homaster/detail.html'
@@ -256,7 +323,7 @@ class HandoutDetailView(LoginRequiredCustomMixin, DetailView):
         context = super().get_context_data(**kwargs)
 
         player = self.request.user
-        if player.gm_flag:
+        if player.is_gm:
             context['allowed'] = True
         else:
             auth = Auth.objects.get(handout=handout, player=player)
@@ -274,7 +341,7 @@ class UpdateHandoutView(LoginRequiredCustomMixin, UpdateView):
     success_url = reverse_lazy("homaster:engawa")
 
     def get(self, request, *args, **kwargs):
-        if not request.user.gm_flag:
+        if not request.user.is_gm:
             logging.error(f"This player with p_code {request.user.p_code} is not GM.")
             raise Http404()
         ho_id = kwargs['pk']
@@ -308,7 +375,7 @@ class UpdateHandoutView(LoginRequiredCustomMixin, UpdateView):
         if ho_after.hidden != ho_before.hidden:
             Auth.objects.filter(handout=ho_before).update(auth_front=(not ho_after.hidden))
         self.object = form.save()
-        return HttpResponseRedirect(self.get_success_url())
+        return redirect(self.get_success_url())
 
 class ConfirmCloseView(BSModalFormView):
     template_name = 'homaster/close_confirm_modal.html'
