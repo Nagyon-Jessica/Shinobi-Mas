@@ -209,6 +209,10 @@ STATIC_URL = '/static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+EMAIL_HOST = 'smtp.sendgrid.net'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
 # Activate Django-Heroku.
 django_heroku.settings(locals())
 
@@ -219,6 +223,9 @@ except ImportError:
 
 if not DEBUG:
     SECRET_KEY = os.environ['SECRET_KEY']
+
+    EMAIL_HOST_USER = os.environ['EMAIL_HOST_USER']
+    EMAIL_HOST_PASSWORD = os.environ['EMAIL_HOST_PASSWORD']
 
     WEBPUSH_SETTINGS = {
         "VAPID_PUBLIC_KEY": "BNYTz3FBz6KfOfVJSLyPsMm_lXQgsdS77kEpTy65A1vUDuimC7euCA_QEw_IJnJ-QYIwCV-YEqAtuStoWd3-3yc",
