@@ -21,7 +21,7 @@ class HandoutFactory(factory.django.DjangoModelFactory):
     pl_name = factory.Sequence(lambda n: "pl%04d" % n)
     front = "omote"
     back = "ura"
-    p_code = "12345678"
+    p_code = factory.Sequence(lambda n: "%08d" % n)
 
 class PlayerFactory(factory.django.DjangoModelFactory):
     class Meta:
