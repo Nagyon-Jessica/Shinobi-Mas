@@ -41,7 +41,9 @@
               <td class="ho-detail-table-col">秘密(裏)</td>
               <td colspan=2>
                 {% if allowed %}
-                {{ handout.back }}
+                  {{ handout.back }}
+                {% else %}
+                  秘密は非公開です
                 {% endif %}
               </td>
             </tr>
