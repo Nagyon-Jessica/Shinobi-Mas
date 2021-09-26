@@ -1,6 +1,6 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
   <meta charset="utf-8">
   <title>ハンドアウト詳細 - Shinobi-Mas</title>
@@ -12,43 +12,45 @@
   <script src="{% static 'assets/js/bootstrap.js' %}"></script>
 </head>
 <body>
-  <div class="your-auth">
+  <header class="header fixed-top your-auth">
     あなたは<strong>{{ role_name }}</strong>です。
-  </div>
-  <div class="ho-detail-form">
-    <div class="ho-detail-type">
-      ハンドアウト種別: {{ ho_type }}
+  </header>
+  <main class="main main-wrapper">
+    <div class="ho-detail-form">
+      <div class="ho-detail-type">
+        ハンドアウト種別: {{ ho_type }}
+      </div>
+      <div>
+        <form action="" method="POST">
+          {% csrf_token %}
+          <table class="ho-detail-table">
+            <tr>
+              <td class="ho-detail-table-col">PC名 </td>
+              <td class="ho-detail-table-charf">{{ handout.pc_name|default_if_none:"（未指定）" }}</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td class="ho-detail-table-col">PL名 </td>
+              <td colspan=2>{{ handout.pl_name|default_if_none:"（未指定）" }}</td>
+            </tr>
+            <tr class="ho-detail-table-textf">
+              <td class="ho-detail-table-col">使命(表)</td>
+              <td colspan=2>{{ handout.front }}</td>
+            </tr>
+            <tr class="ho-detail-table-textf">
+              <td class="ho-detail-table-col">秘密(裏)</td>
+              <td colspan=2>
+                {% if allowed %}
+                {{ handout.back }}
+                {% endif %}
+              </td>
+            </tr>
+          </table>
+          <a class="btn btn-secondary" href="{{ request.META.HTTP_REFERER }}">戻る</a>
+        </form>
+      </div>
     </div>
-    <div>
-      <form action="" method="POST">
-        {% csrf_token %}
-        <table class="ho-detail-table">
-          <tr>
-            <td class="ho-detail-table-col">PC名 </td>
-            <td class="ho-detail-table-charf">{{ handout.pc_name|default_if_none:"（未指定）" }}</td>
-            <td></td>
-          </tr>
-          <tr>
-            <td class="ho-detail-table-col">PL名 </td>
-            <td colspan=2>{{ handout.pl_name|default_if_none:"（未指定）" }}</td>
-          </tr>
-          <tr class="ho-detail-table-textf">
-            <td class="ho-detail-table-col">使命(表)</td>
-            <td colspan=2>{{ handout.front }}</td>
-          </tr>
-          <tr class="ho-detail-table-textf">
-            <td class="ho-detail-table-col">秘密(裏)</td>
-            <td colspan=2>
-              {% if allowed %}
-              {{ handout.back }}
-              {% endif %}
-            </td>
-          </tr>
-        </table>
-        <a class="btn btn-secondary" href="{{ request.META.HTTP_REFERER }}">戻る</a>
-      </form>
-    </div>
-  </div>
+  </main>
   <footer class="footer fixed-bottom">
     <div class="container">
       <p class="text-muted text-center">

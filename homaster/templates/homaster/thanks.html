@@ -1,26 +1,28 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="ja">
-
-<!-- ヘッダ -->
 <head>
   <meta charset="UTF-8">
   <title>Shinobi-Mas</title>
   <link rel="icon" type="image/png" href="{% static 'favicon.ico' %}">
+  <link rel="stylesheet" href="{% static 'assets/css/bootstrap.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/css/shinobi-mas-common.css' %}">
 </head>
-
-<!-- 本文 -->
 <body>
-ご利用ありがとうございました！またのセッションをお待ちしております！<br>
-5秒後にトップページへ戻ります。
-<footer class="footer fixed-bottom">
-  <div class="container">
-    <p class="text-muted text-center">
-      © 2021 Shinobi-Mas<br>
-      お問い合わせはこちら→ shinobimas.master@gmail.com
+  <main class="main main-wrapper">
+    <p class="text-center">
+      ご利用ありがとうございました！またのセッションをお待ちしております！<br>
+      5秒後にトップページへ戻ります。
     </p>
-  </div>
-</footer>
+  </main>
+  <footer class="footer fixed-bottom">
+    <div class="container">
+      <p class="text-muted text-center">
+        © 2021 Shinobi-Mas<br>
+        お問い合わせはこちら→ shinobimas.master@gmail.com
+      </p>
+    </div>
+  </footer>
 </body>
 <script type="text/javascript">
   setTimeout(function(){

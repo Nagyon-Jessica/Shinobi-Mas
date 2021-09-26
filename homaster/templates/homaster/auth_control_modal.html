@@ -9,7 +9,7 @@
   </div>
 
   <div class="modal-body">
-    {{ ho_name }}({{ pc_name|default_if_none:"未指定" }})に対する閲覧権限を付与します
+    <p>{{ ho_name }}({{ pc_name|default_if_none:"未指定" }})に対する閲覧権限を付与します</p>
     {% for field in form %}
     <div class="form-group{% if field.errors %} invalid{% endif %}">
       <label for="{{ field.id_for_label }}">{{ field.label }}</label>
