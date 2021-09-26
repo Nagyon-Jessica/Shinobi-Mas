@@ -23,7 +23,7 @@ class Player(AbstractBaseUser):
     engawa = models.ForeignKey(Engawa, on_delete=models.CASCADE)
     handout = models.OneToOneField(Handout, on_delete=models.CASCADE, null=True, blank=True)
     p_code = models.CharField(max_length=8)
-    gm_flag = models.BooleanField()
+    role = models.PositiveSmallIntegerField(default=0)
 
     USERNAME_FIELD = 'id'
 
@@ -31,6 +31,10 @@ class Player(AbstractBaseUser):
         indexes = [
             models.Index(fields=['engawa', 'p_code'])
         ]
+
+    @property
+    def is_gm(self):
+        return self.role == 1
 
 class Auth(models.Model):
     player = models.ForeignKey(Player, on_delete=models.CASCADE, db_index=True)
