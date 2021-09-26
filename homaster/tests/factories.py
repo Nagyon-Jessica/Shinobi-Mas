@@ -2,14 +2,15 @@ import factory, uuid
 
 from homaster.models import *
 
-class EngawaFactory(factory.Factory):
+class EngawaFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Engawa
+        django_get_or_create = ('uuid',)
 
     uuid = uuid.uuid4()
     scenario_name = factory.Sequence(lambda n: "test%04d" % n)
 
-class HandoutFactory(factory.Factory):
+class HandoutFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Handout
 
@@ -22,7 +23,7 @@ class HandoutFactory(factory.Factory):
     back = "ura"
     p_code = "12345678"
 
-class PlayerFactory(factory.Factory):
+class PlayerFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Player
 
@@ -32,7 +33,7 @@ class PlayerFactory(factory.Factory):
     p_code = factory.LazyAttribute(lambda obj: obj.handout.p_code)
     role = 1
 
-class AuthFactory(factory.Factory):
+class AuthFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Auth
 
