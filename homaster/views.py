@@ -18,11 +18,13 @@ from .models import *
 from .forms import *
 from .constants import *
 
+logger = logging.getLogger(__name__)
+
 def signin(request, **kwargs):
     if "p_code" in request.GET:
         p_code = request.GET.get("p_code")
     else:
-        logging.error("There is not p_code in query string.")
+        logger.error("There is not p_code in query string.")
         return redirect('homaster:index')
 
     # アクセスユーザの存在確認
@@ -48,13 +50,13 @@ def signin(request, **kwargs):
             try:
                 send_mail(subject, message, from_email, recipient_list, fail_silently=False)
             except Exception:
-                logging.exception(f"Cannot send an email to {player.email}.")
+                logger.exception(f"Cannot send an email to {player.email}.")
         # 存在するユーザならログイン
         login(request, player)
         request.user = player
     else:
         # ユーザが存在しなければトップページへリダイレクト
-        logging.error(f"There is not a player with p_code {p_code} in ENGAWA {uuid}")
+        logger.error(f"There is not a player with p_code {p_code} in ENGAWA {uuid}")
         return redirect('homaster:index')
     # ハンドアウト一覧画面へ遷移
     return redirect('homaster:engawa')
@@ -66,7 +68,7 @@ def delete(request):
 
     # ログインユーザがGMでなければエラー
     if not request.user.is_gm:
-        logging.error(f"This player with p_code {request.user.p_code} is not GM.")
+        logger.error(f"This player with p_code {request.user.p_code} is not GM.")
         raise Http404()
 
     ho_id = request.GET.get('id')
@@ -75,7 +77,7 @@ def delete(request):
 
     # 他のENGAWAのハンドアウトを削除しようとしていたらエラー
     if handout.engawa != request.user.engawa:
-        logging.error(f"This player with p_code {request.user.p_code} cannot delete a handout(ID: {handout.id}) of other ENGAWA.")
+        logger.error(f"This player with p_code {request.user.p_code} cannot delete a handout(ID: {handout.id}) of other ENGAWA.")
         raise Http404()
 
     handout.delete()
@@ -89,7 +91,7 @@ def close_engawa(request):
 
     # ログインユーザがGMでなければエラー
     if not request.user.is_gm:
-        logging.error(f"This player with p_code {request.user.p_code} is not GM.")
+        logger.error(f"This player with p_code {request.user.p_code} is not GM.")
         raise Http404()
     request.user.engawa.delete()
     return redirect("homaster:close-success")
@@ -146,7 +148,7 @@ class IndexView(FormView):
             try:
                 send_mail(subject, message, from_email, recipient_list, fail_silently=False)
             except Exception:
-                logging.exception(f"Cannot send an email to {player.email}.")
+                logger.exception(f"Cannot send an email to {player.email}.")
 
             # GMのログイン処理
             login(self.request, player)
@@ -166,7 +168,7 @@ class IndexView(FormView):
             try:
                 send_mail(subject, message, from_email, recipient_list, fail_silently=False)
             except Exception:
-                logging.exception(f"Cannot send an email to {email}.")
+                logger.exception(f"Cannot send an email to {email}.")
             # 仮登録完了画面にリダイレクト
             return redirect("homaster:interim")
 
@@ -189,7 +191,7 @@ class ReenterView(FormView):
         try:
             send_mail(subject, message, from_email, recipient_list)
         except Exception:
-            logging.exception("Cannot send an email.")
+            logger.exception("Cannot send an email.")
         return redirect('homaster:reenter')
 
 class EngawaView(LoginRequiredCustomMixin, ListView):
@@ -242,7 +244,7 @@ class CreateHandoutView(LoginRequiredCustomMixin, CreateView):
 
     def get(self, request, *args, **kwargs):
         if not request.user.is_gm:
-            logging.error(f"This player with p_code {request.user.p_code} is not GM.")
+            logger.error(f"This player with p_code {request.user.p_code} is not GM.")
             raise Http404()
         # クエリパラメータが不正の場合，自動で"1"とする
         if self.request.GET.get("type", default=None) not in ["1", "2", "3"]:
@@ -348,7 +350,7 @@ class UpdateHandoutView(LoginRequiredCustomMixin, UpdateView):
 
     def get(self, request, *args, **kwargs):
         if not request.user.is_gm:
-            logging.error(f"This player with p_code {request.user.p_code} is not GM.")
+            logger.error(f"This player with p_code {request.user.p_code} is not GM.")
             raise Http404()
         ho_id = kwargs['pk']
         get_object_or_404(Handout, engawa=request.user.engawa, id=ho_id)
@@ -547,4 +549,4 @@ def send_push(auth, ho_name):
     try:
         send_user_notification(user=player, payload=payload, ttl=1000)
     except Exception:
-        logging.exception("Failed to send Webpush.")
+        logger.exception("Failed to send Webpush.")

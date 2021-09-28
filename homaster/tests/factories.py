@@ -1,4 +1,4 @@
-import factory, uuid
+import factory
 
 from homaster.models import *
 
@@ -7,7 +7,7 @@ class EngawaFactory(factory.django.DjangoModelFactory):
         model = Engawa
         django_get_or_create = ('uuid',)
 
-    uuid = uuid.uuid4()
+    uuid = factory.Faker("uuid4")
     scenario_name = factory.Sequence(lambda n: "test%04d" % n)
 
 class HandoutFactory(factory.django.DjangoModelFactory):
@@ -17,10 +17,10 @@ class HandoutFactory(factory.django.DjangoModelFactory):
     engawa = factory.SubFactory(EngawaFactory)
     type = 1
     hidden = None
-    pc_name = factory.Sequence(lambda n: "pc%04d" % n)
-    pl_name = factory.Sequence(lambda n: "pl%04d" % n)
-    front = "omote"
-    back = "ura"
+    pc_name = factory.Faker("first_name")
+    pl_name = factory.Faker("last_name")
+    front = factory.Faker("address")
+    back = factory.Faker("company")
     p_code = factory.Sequence(lambda n: "%08d" % n)
 
 class PlayerFactory(factory.django.DjangoModelFactory):

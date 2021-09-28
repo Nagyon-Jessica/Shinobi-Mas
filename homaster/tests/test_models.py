@@ -14,7 +14,9 @@ class PlayerModelTest(TestCase):
 
 class AuthModelTest(TestCase):
     def test_auth_init(self):
-        """Authオブジェクトが辞書型のorig_auth属性を持つことのテスト"""
+        """
+        Authオブジェクトが辞書型のorig_auth属性を持つことのテスト
+        """
         auth = AuthFactory()
         self.assertTrue(hasattr(auth, 'orig_auth'))
         self.assertTrue("auth_front" in auth.orig_auth)
