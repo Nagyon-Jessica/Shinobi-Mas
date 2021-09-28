@@ -26,24 +26,30 @@
           <table class="ho-detail-table">
             <tr>
               <td class="ho-detail-table-col">PC名 </td>
-              <td class="ho-detail-table-charf">{{ handout.pc_name|default_if_none:"（未指定）" }}</td>
+              <td class="ho-detail-table-charf">
+                <input type="text" name="pc_name" value="{{ handout.pc_name|default_if_none:"（未指定）" }}" maxlength="100" readonly>
+              </td>
               <td></td>
             </tr>
             <tr>
               <td class="ho-detail-table-col">PL名 </td>
-              <td colspan=2>{{ handout.pl_name|default_if_none:"（未指定）" }}</td>
+              <td colspan=2>
+                <input type="text" name="pc_name" value="{{ handout.pl_name|default_if_none:"（未指定）" }}" maxlength="100" readonly>
+              </td>
             </tr>
             <tr class="ho-detail-table-textf">
               <td class="ho-detail-table-col">使命(表)</td>
-              <td colspan=2>{{ handout.front }}</td>
+              <td colspan=2>
+                <textarea cols="40" rows="10" maxlength="1000" readonly>{{ handout.front }}</textarea>
+              </td>
             </tr>
             <tr class="ho-detail-table-textf">
               <td class="ho-detail-table-col">秘密(裏)</td>
               <td colspan=2>
                 {% if allowed %}
-                  {{ handout.back }}
+                <textarea cols="40" rows="10" maxlength="1000" readonly>{{ handout.back }}</textarea>
                 {% else %}
-                  秘密は非公開です
+                <textarea cols="40" rows="10" maxlength="1000" readonly>秘密は非公開です</textarea>
                 {% endif %}
               </td>
             </tr>
