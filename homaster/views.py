@@ -198,7 +198,7 @@ class EngawaView(LoginRequiredCustomMixin, ListView):
 
     def get_queryset(self):
         engawa = self.request.user.engawa
-        return Handout.objects.filter(engawa=engawa).order_by('type')
+        return Handout.objects.filter(engawa=engawa).order_by('type', 'id')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -421,7 +421,7 @@ class AuthControlView(BSModalFormView):
         form = super().get_form()
         ho_id = self.request.GET.get('id')
         handout = Handout.objects.get(id=ho_id)
-        auths = Auth.objects.filter(handout=handout)
+        auths = Auth.objects.filter(handout=handout).order_by('player__id')
         ho_names = self.request.session['ho_names']
         choices_front = []
         choices_back = []
