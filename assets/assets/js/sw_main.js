@@ -21,7 +21,7 @@ function urlB64ToUint8Array(base64String) {
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register("sw.js")
   .then(function(reg) {
-    console.log('登録に成功しました。', reg);
+    console.log('登録に成功しました。');
     swRegistration = reg;
     initialiseUI();
   }).catch(function(error) {
@@ -53,7 +53,8 @@ function subscribeUser() {
     applicationServerKey: applicationServerKey
   })
   .then(function(subscription) {
-    console.log('User is subscribed:', subscription);
+    console.log('User is subscribed.');
+    // console.log('User is subscribed:', subscription);
 
     sendSubData(subscription);
 
@@ -81,9 +82,9 @@ const sendSubData = async (subscription) => {
       credentials: "include"
   });
 
-  handleResponse(res);
+  // handleResponse(res);
 };
 
-const handleResponse = (res) => {
-  console.log(res.status);
-};
+// const handleResponse = (res) => {
+//   console.log(res.status);
+// };
