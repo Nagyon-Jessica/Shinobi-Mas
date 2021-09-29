@@ -10,13 +10,14 @@
 </head>
 <body>
   <main class="main main-wrapper">
-    <div class="index-app-name text-center h1">
-      <h1>Shinobi-Mas</h1>
+    <div class="index-app-name text-center">
+      <h1>Shinobi-Mas (β)</h1>
+      <p>TRPGハンドアウト管理ツール</p>
     </div>
     <div class="index-app-form text-center">
       <form method="post">{% csrf_token %}
         {{ form.as_p }}
-        <input type="submit" value="ENGAWAを設える">
+        <input class="btn btn-primary" type="submit" value="ENGAWAを設える">
       </form>
     </div>
     <div class="index-app-reenter-form text-center">
