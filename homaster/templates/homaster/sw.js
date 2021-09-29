@@ -5,20 +5,16 @@ self.addEventListener('install', (event) => {
 
 // Service Worker アクティベート時に実行される
 self.addEventListener('activate', (event) => {
-  console.info('activate', event);
-});
-
-self.addEventListener('fetch', (event) => {
-  console.log('service worker fetch ... ' + event.request);
+  console.info('activate');
+  // console.info('activate', event);
 });
 
 self.addEventListener('push', function(event) {
-  console.log('[Service Worker] Push Received.');
-  console.log(`[Service Worker] Push had this data: "${event.data.text()}"`);
+  // console.log('[Service Worker] Push Received.');
+  // console.log(`[Service Worker] Push had this data: "${event.data.text()}"`);
 
   const eventInfo = event.data.text();
   const data = JSON.parse(eventInfo);
-  console.log(data);
   const head = data.head;
   const body = data.body;
 
