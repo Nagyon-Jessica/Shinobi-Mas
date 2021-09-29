@@ -421,7 +421,7 @@ class AuthControlView(BSModalFormView):
         form = super().get_form()
         ho_id = self.request.GET.get('id')
         handout = Handout.objects.get(id=ho_id)
-        auths = Auth.objects.filter(handout=handout)
+        auths = Auth.objects.filter(handout=handout).order_by('player__id')
         ho_names = self.request.session['ho_names']
         choices_front = []
         choices_back = []
