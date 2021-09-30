@@ -1,0 +1,40 @@
+/* 共通部品など */
+.your-auth{
+  width: auto;
+  margin: 0px auto;
+  padding: 5px 100px;
+  background-color: #CCCCCC	;
+}
+.main-wrapper{
+  min-height: 100vh;
+  position: relative;
+  padding-top: 40px;
+  padding-bottom: 60px;
+  box-sizing: border-box;
+}
+
+/* トップページ */
+.index-app-name{
+  height: 60%;
+  padding: 100px;
+}
+.index-app-form{
+  height: 30%;
+  padding: 20px;
+}
+.index-app-reenter-form{
+  height: 10%;
+  padding: 20px;
+}
+
+/* 再発行ページ */
+.return-buttom{
+  float: right;
+  padding: 5px 120px;
+}
+
+/* ハンドアウト詳細 */
+textarea{
+  height: 200px;
+  width: 1000px;
+}

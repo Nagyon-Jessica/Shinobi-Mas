@@ -9,13 +9,13 @@
   </div>
 
   <div class="modal-body">
-    {{ ho_name }}({{ handout.pc_name|default_if_none:"未指定" }})を削除しますか？<br>
+    <p>{{ ho_name }}({{ handout.pc_name|default_if_none:"未指定" }})を削除しますか？</p>
     「{{ ho_name }}」という文言が含まれている<br>ハンドアウトがある場合は修正してください。
   </div>
 
   <div class="modal-footer">
     <input type="hidden" name="submit_token" value="{{ submit_token }}"/>
-    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-    <button type="submit" class="btn btn-danger">Delete</button>
+    <button type="button" class="btn btn-default" data-dismiss="modal">キャンセル</button>
+    <button type="submit" class="btn btn-danger">削除</button>
   </div>
 </form>

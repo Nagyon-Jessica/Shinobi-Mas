@@ -1,3 +1,4 @@
+import logging
 from django import forms
 from django.core.mail import send_mail
 from django.forms.fields import CharField, ChoiceField, EmailField, MultipleChoiceField
@@ -12,18 +13,6 @@ class IndexForm(forms.Form):
         required=False
     )
 
-    def clean_email(self):
-        email = self.cleaned_data['email']
-        if email:
-            subject = "test"
-            message = "sample"
-            from_email = "tomono@example.com"
-            recipient_list = [email]
-            ret = send_mail(subject, message, from_email, recipient_list)
-            if ret < 1:
-                raise forms.ValidationError("メールを送信できませんでした。正しいメールアドレスを入力してください")
-        return email
-
 class ReenterForm(forms.Form):
     email = EmailField(
         label="入力したメールアドレスが登録済みの場合，シナリオのURLをメールで送信します",
@@ -32,7 +21,7 @@ class ReenterForm(forms.Form):
 
     def clean_email(self):
         email = self.cleaned_data['email']
-        accounts = Player.objects.filter(email=email, gm_flag=True)
+        accounts = Player.objects.filter(email=email, role=1)
         if not accounts:
             raise forms.ValidationError("このメールアドレスは登録されていません")
         return email

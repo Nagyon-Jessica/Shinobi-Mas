@@ -1,10 +1,12 @@
 from django.urls import path
+from django.views.generic.base import RedirectView
 from . import views
 
 app_name = 'homaster'
 urlpatterns = [
     path('index', views.IndexView.as_view(), name='index'),
     path('reenter', views.ReenterView.as_view(), name='reenter'),
+    path('interim', views.interim, name='interim'),
     path('engawa', views.EngawaView.as_view(), name='engawa'),
     path('close-engawa', views.ConfirmCloseView.as_view(), name='close-engawa'),
     path('close', views.close_engawa, name='close'),
@@ -18,4 +20,5 @@ urlpatterns = [
     path('delete-handout', views.ConfirmDeleteView.as_view(), name='delete-handout'),
     path('close-success', views.after_close, name='close-success'),
     path('<uuid>', views.signin, name='signin'),
+    path('', RedirectView.as_view(pattern_name="homaster:index")),
 ]

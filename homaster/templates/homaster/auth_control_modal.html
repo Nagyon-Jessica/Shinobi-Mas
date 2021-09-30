@@ -9,7 +9,7 @@
   </div>
 
   <div class="modal-body">
-    {{ ho_name }}({{ pc_name|default_if_none:"未指定" }})に対する閲覧権限を付与します
+    <p>{{ ho_name }}({{ pc_name|default_if_none:"未指定" }})に対する閲覧権限を付与します</p>
     {% for field in form %}
     <div class="form-group{% if field.errors %} invalid{% endif %}">
       <label for="{{ field.id_for_label }}">{{ field.label }}</label>
@@ -22,7 +22,8 @@
   </div>
 
   <div class="modal-footer">
-    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-    <button type="submit" class="btn btn-primary">Create</button>
+    <input type="hidden" name="submit_token" value="{{ submit_token }}"/>
+    <button type="button" class="btn btn-default" data-dismiss="modal">キャンセル</button>
+    <button type="submit" class="btn btn-primary">更新</button>
   </div>
 </form>

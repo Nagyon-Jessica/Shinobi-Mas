@@ -1,51 +1,70 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
   <meta charset="utf-8">
   <title>ハンドアウト詳細 - Shinobi-Mas</title>
   <link rel="icon" type="image/png" href="{% static 'favicon.ico' %}">
   <link rel="stylesheet" href="{% static 'assets/css/bootstrap.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/css/shinobi-mas-common.css' %}">
   <link rel="stylesheet" href="{% static 'assets/css/shinobi-mas-ho-detail.css' %}">
   <script src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
   <script src="{% static 'assets/js/bootstrap.js' %}"></script>
 </head>
 <body>
-  <div class="your-auth">
-    あなたは{{ role_name }}です
-  </div>
-  <div class="ho-detail-form">
-    <div class="ho-detail-type">
-      ハンドアウト種別: {{ ho_type }}
+  <header class="header fixed-top your-auth">
+    あなたは<strong>{{ role_name }}</strong>です。
+  </header>
+  <main class="main main-wrapper">
+    <div class="ho-detail-form">
+      <div class="ho-detail-type">
+        ハンドアウト種別: {{ ho_type }}
+      </div>
+      <div>
+        <form action="" method="POST">
+          {% csrf_token %}
+          <table class="ho-detail-table">
+            <tr>
+              <td class="ho-detail-table-col">PC名 </td>
+              <td class="ho-detail-table-charf">
+                <input type="text" name="pc_name" value="{{ handout.pc_name|default_if_none:"（未指定）" }}" maxlength="100" readonly>
+              </td>
+              <td></td>
+            </tr>
+            <tr>
+              <td class="ho-detail-table-col">PL名 </td>
+              <td colspan=2>
+                <input type="text" name="pc_name" value="{{ handout.pl_name|default_if_none:"（未指定）" }}" maxlength="100" readonly>
+              </td>
+            </tr>
+            <tr class="ho-detail-table-textf">
+              <td class="ho-detail-table-col">使命(表)</td>
+              <td colspan=2>
+                <textarea cols="40" rows="10" maxlength="1000" readonly>{{ handout.front }}</textarea>
+              </td>
+            </tr>
+            <tr class="ho-detail-table-textf">
+              <td class="ho-detail-table-col">秘密(裏)</td>
+              <td colspan=2>
+                {% if allowed %}
+                <textarea cols="40" rows="10" maxlength="1000" readonly>{{ handout.back }}</textarea>
+                {% else %}
+                <textarea cols="40" rows="10" maxlength="1000" readonly>秘密は非公開です</textarea>
+                {% endif %}
+              </td>
+            </tr>
+          </table>
+          <a class="btn btn-secondary" href="{{ request.META.HTTP_REFERER }}">戻る</a>
+        </form>
+      </div>
     </div>
-    <div>
-      <form action="" method="POST">
-        {% csrf_token %}
-        <table class="ho-detail-table">
-          <tr>
-            <td class="ho-detail-table-col">PC名 </td>
-            <td class="ho-detail-table-charf">{{ handout.pc_name|default_if_none:"（未指定）" }}</td>
-            <td></td>
-          </tr>
-          <tr>
-            <td class="ho-detail-table-col">PL名 </td>
-            <td colspan=2>{{ handout.pl_name|default_if_none:"（未指定）" }}</td>
-          </tr>
-          <tr class="ho-detail-table-textf">
-            <td class="ho-detail-table-col">使命(表)</td>
-            <td colspan=2>{{ handout.front }}</td>
-          </tr>
-          <tr class="ho-detail-table-textf">
-            <td class="ho-detail-table-col">秘密(裏)</td>
-            <td colspan=2>
-              {% if allowed %}
-              {{ handout.back }}
-              {% endif %}
-            </td>
-          </tr>
-        </table>
-        <a class="btn btn-secondary" href="{{ request.META.HTTP_REFERER }}">戻る</a>
-      </form>
+  </main>
+  <footer class="footer fixed-bottom">
+    <div class="container">
+      <p class="text-muted text-center">
+        © 2021 Shinobi-Mas<br>
+        お問い合わせはこちら→ shinobimas.master@gmail.com
+      </p>
     </div>
-  </div>
+  </footer>
 </body>
