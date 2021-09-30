@@ -1,0 +1,64 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>ハンドアウト編集 - Shinobi-Mas</title>
+  <link rel="icon" type="image/png" href="{% static 'favicon.ico' %}">
+  <link rel="stylesheet" href="{% static 'assets/css/bootstrap.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/css/shinobi-mas-common.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/css/shinobi-mas-ho-detail.css' %}">
+  <script src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
+  <script src="{% static 'assets/js/bootstrap.js' %}"></script>
+  <script src="{% static 'js/jquery.bootstrap.modal.forms.js' %}"></script>
+</head>
+<body>
+  <header class="header fixed-top your-auth">
+    あなたは<strong>{{ role_name }}</strong>です。
+  </header>
+  <main class="main main-wrapper">
+    <div class="ho-detail-form">
+      <div class="ho-detail-type">
+        ハンドアウト種別: {{ ho_type }}
+      </div>
+      <div>
+        <form action="" method="POST">
+          {% csrf_token %}
+          <table class="ho-detail-table">
+            <tr>
+              <td class="ho-detail-table-col">PC名 </td>
+              <td class="ho-detail-table-charf">{{ form.pc_name }}</td>
+              <td>
+                {% if ho_type != "PC" %}
+                {{ form.hidden }} 非公開（シナリオ開始時には表を含め公開されません）
+                {% endif %}
+              </td>
+            </tr>
+            <tr>
+              <td class="ho-detail-table-col">PL名 </td>
+              <td colspan=2>{{ form.pl_name }}</td>
+            </tr>
+            <tr class="ho-detail-table-textf">
+              <td class="ho-detail-table-col">使命(表)</td>
+              <td colspan=2>{{ form.front }}</td>
+            </tr>
+            <tr class="ho-detail-table-textf">
+              <td class="ho-detail-table-col">秘密(裏)</td>
+              <td colspan=2>{{ form.back }}</td>
+            </tr>
+          </table>
+          <button type="submit" class="btn btn-primary">保存</button>
+          <a class="btn btn-secondary" href="{{ request.META.HTTP_REFERER }}">戻る</a>
+        </form>
+      </div>
+    </div>
+  </main>
+  <footer class="footer fixed-bottom">
+    <div class="container">
+      <p class="text-muted text-center">
+        © 2021 Shinobi-Mas<br>
+        お問い合わせはこちら→ shinobimas.master@gmail.com
+      </p>
+    </div>
+  </footer>
+</body>
