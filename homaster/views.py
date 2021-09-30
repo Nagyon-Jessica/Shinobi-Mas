@@ -315,7 +315,13 @@ class HandoutDetailView(LoginRequiredCustomMixin, DetailView):
 
     def get(self, request, *args, **kwargs):
         ho_id = kwargs['pk']
-        get_object_or_404(Handout, engawa=request.user.engawa, id=ho_id)
+        # ログイン中のENGAWAにid=pkとなるハンドアウトがなければ404
+        ho = get_object_or_404(Handout, engawa=request.user.engawa, id=ho_id)
+        # ハンドアウトが非公開且つユーザがPLの場合，表の閲覧権限がなければ404
+        if ho.hidden and not request.user.is_gm:
+            auth = Auth.objects.get(handout=ho, player=request.user)
+            if not auth.auth_front:
+                raise Http404
         return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
