@@ -9,9 +9,12 @@ on:
 jobs:
   unittest:
     name: Unit Test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     strategy:
       max-parallel: 2
+    env:
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      SYSTEM_ENV: "TestWorkflow"
 
     steps:
     - uses: actions/checkout@v2
@@ -25,4 +28,5 @@ jobs:
         pip install -r requirements.txt
     - name: Run Tests
       run: |
+        python manage.py collectstatic
         python manage.py test
