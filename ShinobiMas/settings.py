@@ -10,7 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
-import os
+import os, sys
 import django_heroku
 import dj_database_url
 from pathlib import Path
@@ -22,12 +22,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+SYSTEM_ENV = os.environ.get('SYSTEM_ENV', None)
+
+if SYSTEM_ENV == "TestWorkflow":
+    DEBUG = True
+else:
+    DEBUG = False
 
 ALLOWED_HOSTS = ['127.0.0.1', '.herokuapp.com']
-
-EMAIL_HOST = 'localhost'
-EMAIL_PORT = 1025
 
 # Application definition
 
@@ -78,20 +80,27 @@ WSGI_APPLICATION = 'ShinobiMas.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'name',
-        'USER': 'user',
-        'PASSWORD': '',
-        'HOST': 'host',
-        'PORT': '',
+if sys.argv[1] == 'test':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': 'name',
+            'USER': 'user',
+            'PASSWORD': '',
+            'HOST': 'host',
+            'PORT': '',
+        }
+    }
 
-db_from_env = dj_database_url.config(conn_max_age=600, ssl_require=True)
-DATABASES['default'].update(db_from_env)
+    db_from_env = dj_database_url.config(conn_max_age=600, ssl_require=True)
+    DATABASES['default'].update(db_from_env)
 
 # CustomUser
 AUTH_USER_MODEL = "homaster.Player"
