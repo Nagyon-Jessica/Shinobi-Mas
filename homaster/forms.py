@@ -1,4 +1,3 @@
-import logging
 from django import forms
 from django.core.mail import send_mail
 from django.forms.fields import CharField, ChoiceField, EmailField, MultipleChoiceField
