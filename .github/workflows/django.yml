@@ -12,6 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 2
+    env:
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
 
     steps:
     - uses: actions/checkout@v2
