@@ -9,7 +9,7 @@ on:
 jobs:
   unittest:
     name: Unit Test
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     strategy:
       max-parallel: 2
     env:
