@@ -1,0 +1,42 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>リリースノート</title>
+  <link rel="icon" type="image/png" href="{% static 'favicon.ico' %}">
+  <link rel="stylesheet" href="{% static 'assets/css/bootstrap.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/css/shinobi-mas-common.css' %}">
+</head>
+<body>
+  <main class="main main-wrapper">
+    <div class="return-buttom">
+      <a class="btn btn-secondary" href="{% url 'homaster:index' %}">戻る</a>
+    </div>
+    <h2>
+      Ver. 0.2.0
+    </h2>
+    Released on 2022/MM/dd
+    <ul>
+      <li>リリースノートを作成</li>
+      <li>閲覧権限管理テーブルを実装</li>
+      <li>招待URLの表示を集約化</li>
+    </ul>
+    <h2>
+      Ver. 0.1.0
+    </h2>
+    Released on 2021/09/30
+    <ul>
+      <li>Shinobi-Mas(β)をリリース</li>
+    </ul>
+  </main>
+  <footer class="footer fixed-bottom">
+    <div class="container">
+      <p class="text-muted text-center">
+        © 2021 Shinobi-Mas<br>
+        お問い合わせはこちら→ shinobimas.master@gmail.com
+      </p>
+    </div>
+  </footer>
+</body>
+</html>
