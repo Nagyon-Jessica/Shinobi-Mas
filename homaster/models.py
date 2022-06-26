@@ -2,8 +2,8 @@ import uuid
 from django.db import models
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 
-class MyManager(BaseUserManager):
-    pass
+# class MyManager(BaseUserManager):
+#     pass
 
 class Engawa(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
