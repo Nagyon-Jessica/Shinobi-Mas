@@ -102,6 +102,9 @@ def after_close(request):
 def interim(request):
     return render(request, template_name="homaster/interim.html")
 
+def release_notes(request):
+    return render(request, template_name="homaster/release_notes.html")
+
 class IndexView(FormView):
     template_name = 'homaster/index.html'
     form_class = IndexForm

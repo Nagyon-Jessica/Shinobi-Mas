@@ -8,12 +8,25 @@
 .main-wrapper{
   min-height: 100vh;
   position: relative;
+  margin: 0px 120px;
   padding-top: 40px;
   padding-bottom: 60px;
   box-sizing: border-box;
 }
 
+/* 共通 - 戻るボタン */
+.return-buttom{
+  float: right;
+  margin: 5px 120px 5px 0px;
+}
+
 /* トップページ */
+.release-note-link{
+  width: auto;
+  margin: 0px auto;
+  padding: 5px 100px;
+  text-decoration: underline;
+}
 .index-app-name{
   height: 60%;
   padding: 100px;
@@ -27,14 +40,16 @@
   padding: 20px;
 }
 
-/* 再発行ページ */
-.return-buttom{
-  float: right;
-  padding: 5px 120px;
-}
-
 /* ハンドアウト詳細 */
 textarea{
   height: 200px;
   width: 1000px;
+}
+
+/* リリースノート */
+.version-block{
+  margin-bottom: 30px;
+}
+.version-block .version-block-body{
+  margin: 0px 15px;
 }
