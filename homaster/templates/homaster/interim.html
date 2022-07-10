@@ -6,18 +6,23 @@
   <title>仮登録完了</title>
   <link rel="icon" type="image/png" href="{% static 'favicon.ico' %}">
   <link rel="stylesheet" href="{% static 'assets/css/bootstrap.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/css/shinobi-mas-common.css' %}">
 </head>
 <body>
-  <div class="text-center">
+  <main class="main main-wrapper">
+    <div class="text-center">
       メールアドレスの仮登録が完了しました。<br>
       ENGAWAに出るためにはメールボックスを確認し，<br>
       「仮登録完了のお知らせ」メールに記載されている本登録URLへアクセスしてください。<br><br>
       しばらくしてもメールが届かない場合は，入力したアドレスが正確でないか，<br>
       @gmail.comからのメールを受け取れない設定になっている可能性があります。<br>
       そちらをご確認の上，操作をやり直してください。
-  </div>
-  <a class="btn btn-secondary text-center" href="{% url 'homaster:index' %}">戻る</a>
-</body>
+    </div>
+    <div class="return-buttom">
+      <a class="btn btn-secondary" href="{% url 'homaster:index' %}">戻る</a>
+    </div>
+  </main>
+  </body>
 <footer class="footer fixed-bottom">
   <div class="container">
     <p class="text-muted text-center">
