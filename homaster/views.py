@@ -1,4 +1,4 @@
-import json
+import pdb
 import logging
 import random
 import string
@@ -439,16 +439,12 @@ class AuthControlView(BSModalFormView):
 
     def get_form(self):
         form = super().get_form()
-
         # ハンドアウトIDとハンドアウト名の対応表
         ho_names = self.request.session['ho_names']
 
         # ENGAWAに属する全PL（GM以外）を取得
         engawa = self.request.user.engawa
         players = Player.objects.filter(engawa=engawa, role=0).order_by('id')
-
-        # PLとAuthの対応付け辞書
-        pl_auth_dict = {}
 
         for pl in players:
             # PLのHO名
@@ -473,9 +469,13 @@ class AuthControlView(BSModalFormView):
         return form
 
     def form_valid(self, form):
+        # チェックがついたAuth IDの一覧を取得
         back_choiced = list(map(lambda k: form.data.getlist(k), filter(lambda key: "_back" in key, self.request.POST.keys())))
         back_choiced = sum(back_choiced, [])
+        front_choiced = list(map(lambda k: form.data.getlist(k), filter(lambda key: "_front" in key, self.request.POST.keys())))
+        front_choiced = sum(front_choiced, [])
         
+        # チェックボックス全体の配列
         choices = []
         for key, field in form.fields.items():
             if "_back" in key:
@@ -484,16 +484,10 @@ class AuthControlView(BSModalFormView):
         ho_names = self.request.session['ho_names']
         for choice in choices:
             auth = Auth.objects.get(id=int(choice[0]))
-            kwargs = {}
-            # 裏が公開なら自動的に表も公開と決まる
-            if choice[0] in back_choiced:
-                kwargs = {"auth_front": True, "auth_back": True}
-            else:
-                kwargs['auth_back'] = False
-                if 'auth_front' in form.fields.keys():
-                    kwargs['auth_front'] = choice[0] in self.request.POST.getlist("auth_front")
-                else:
-                    kwargs['auth_front'] = True
+            kwargs = {
+                "auth_front": choice[0] in front_choiced,
+                "auth_back": choice[0] in back_choiced
+            }
             # print(f"id: {choice[0]}, kwargs: {kwargs}, orig: {auth.orig_auth}")
             # 権限の変更があればDBを更新し，対象PLにプッシュ通知を送信
             if kwargs != auth.orig_auth:
@@ -511,7 +505,6 @@ class AuthControlView(BSModalFormView):
 
     def post(self, request):
         if not exists_submit_token(request):
-            print('Oops!')
             return redirect('homaster:engawa')
         return super().post(request)
 
