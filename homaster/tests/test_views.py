@@ -817,9 +817,11 @@ class AuthControlViewTest(TestCase):
     def test_get_ok(self):
         """
         GMが閲覧権限更新モーダルを表示できる
-        PC1：PC2 ○，PC3 ×
-        NPC1(公開)：PC1 裏○，PC2 裏×，PC3 裏○
-        HO1(非公開)：PC1 ×，PC2 表○，PC3 裏○
+        PC1: PC2 ○, PC3 x
+        PC2: PC1 ○, PC3 x
+        PC3: PC1 x, PC2 x
+        NPC1(公開): PC1 裏○, PC2 裏x, PC3 裏○
+        HO1(非公開): PC1 x, PC2 表○, PC3 裏○
         """
         # ログイン
         c = self.client
@@ -827,19 +829,19 @@ class AuthControlViewTest(TestCase):
 
         # PC1とそれに紐づくPLとAuthを作成
         pc1 = HandoutFactory(engawa=gm.engawa, hidden=False)
-        pl1 = PlayerFactory(email=None, engawa=gm.engawa, handout=pc1)
+        pl1 = PlayerFactory(email=None, engawa=gm.engawa, handout=pc1, role=0)
         auth_pl1_pc1 = AuthFactory(player=pl1, handout=pc1, auth_back=True)
 
         # PC2とそれに紐づくPLとAuthを作成
         pc2 = HandoutFactory(engawa=gm.engawa, hidden=False)
-        pl2 = PlayerFactory(email=None, engawa=gm.engawa, handout=pc2)
-        auth_pl2_pc2 = AuthFactory(player=pl2, handout=pc2, auth_back=True)
+        pl2 = PlayerFactory(email=None, engawa=gm.engawa, handout=pc2, role=0)
+        auth_pl2_pc1 = AuthFactory(player=pl2, handout=pc2, auth_back=True)
         auth_pl1_pc2 = AuthFactory(player=pl1, handout=pc2, auth_back=True)
-        auth_pl2_pc1 = AuthFactory(player=pl2, handout=pc1, auth_back=True)
+        auth_pl2_pc2 = AuthFactory(player=pl2, handout=pc1, auth_back=True)
 
         # PC3とそれに紐づくPLとAuthを作成
         pc3 = HandoutFactory(engawa=gm.engawa, hidden=False)
-        pl3 = PlayerFactory(email=None, engawa=gm.engawa, handout=pc3)
+        pl3 = PlayerFactory(email=None, engawa=gm.engawa, handout=pc3, role=0)
         auth_pl3_pc1 = AuthFactory(player=pl3, handout=pc1, auth_back=False)
         auth_pl3_pc2 = AuthFactory(player=pl3, handout=pc2, auth_back=False)
         auth_pl3_pc3 = AuthFactory(player=pl3, handout=pc3, auth_back=True)
@@ -861,61 +863,71 @@ class AuthControlViewTest(TestCase):
         # 管理画面リロード
         c.get('/engawa')
 
-        # PC1のモーダル表示
-        res1 = c.get(f'/auth-control?id={pc1.id}&name=PC1')
+        # モーダル表示
+        res1 = c.get(f'/auth-control')
         self.assertEqual(res1.status_code, 200)
-        self.assertEqual(res1.context['ho_name'], 'PC1')
-        self.assertEqual(res1.context['pc_name'], pc1.pc_name)
-        choices_1 = [
-            (str(auth_pl2_pc1.id), f'PC2({pc2.pc_name})'),
-            (str(auth_pl3_pc1.id), f'PC3({pc3.pc_name})')
-        ]
-        self.assertEqual(
-            res1.context['form'].fields['auth_back'].choices,
-            choices_1)
-        self.assertEqual(
-            res1.context['form'].fields['auth_back'].initial,
-            [auth_pl2_pc1.id])
 
-        # NPC1のモーダル表示
-        res2 = c.get(f'/auth-control?id={npc1.id}&name=NPC1')
-        self.assertEqual(res2.status_code, 200)
-        self.assertEqual(res2.context['ho_name'], 'NPC1')
-        self.assertEqual(res2.context['pc_name'], npc1.pc_name)
-        choices_2 = [
-            (str(auth_pl1_npc1.id), f'PC1({pc1.pc_name})'),
-            (str(auth_pl2_npc1.id), f'PC2({pc2.pc_name})'),
-            (str(auth_pl3_npc1.id), f'PC3({pc3.pc_name})')
-        ]
+        # context確認
         self.assertEqual(
-            res2.context['form'].fields['auth_back'].choices,
-            choices_2)
-        self.assertEqual(
-            res2.context['form'].fields['auth_back'].initial,
-            [auth_pl1_npc1.id, auth_pl3_npc1.id])
+            res1.context['ho_names'],
+            ['PC1', 'PC2', 'PC3', 'NPC1', 'HO1'])
         
-        # HO1のモーダル表示
-        res3 = c.get(f'/auth-control?id={ho1.id}&name=HO1')
-        self.assertEqual(res3.status_code, 200)
-        self.assertEqual(res3.context['ho_name'], 'HO1')
-        self.assertEqual(res3.context['pc_name'], ho1.pc_name)
-        choices_3= [
-            (str(auth_pl1_ho1.id), f'PC1({pc1.pc_name})'),
-            (str(auth_pl2_ho1.id), f'PC2({pc2.pc_name})'),
-            (str(auth_pl3_ho1.id), f'PC3({pc3.pc_name})')
+        choices_PC1 = [
+            (str(auth_pl1_pc1.id), ''),
+            (str(auth_pl1_pc2.id), ''),
+            (str(auth_pl1_pc3.id), ''),
+            (str(auth_pl1_npc1.id), ''),
+            (str(auth_pl1_ho1.id), ''),
         ]
+        choices_PC2 = [
+            (str(auth_pl2_pc1.id), ''),
+            (str(auth_pl2_pc2.id), ''),
+            (str(auth_pl2_pc3.id), ''),
+            (str(auth_pl2_npc1.id), ''),
+            (str(auth_pl2_ho1.id), ''),
+        ]
+        choices_PC3 = [
+            (str(auth_pl3_pc1.id), ''),
+            (str(auth_pl3_pc2.id), ''),
+            (str(auth_pl3_pc3.id), ''),
+            (str(auth_pl3_npc1.id), ''),
+            (str(auth_pl3_ho1.id), ''),
+        ]
+
+        # 選択肢，初期値の確認
+        # 選択肢は表裏で同じなので表だけ確認する
+        # PC1
         self.assertEqual(
-            res3.context['form'].fields['auth_front'].choices,
-            choices_3)
+            res1.context['form'].fields['PC1_front'].choices,
+            choices_PC1)
         self.assertEqual(
-            res3.context['form'].fields['auth_back'].choices,
-            choices_3)
+            res1.context['form'].fields['PC1_front'].initial,
+            [auth_pl1_pc1.id, auth_pl1_pc2.id, auth_pl1_pc3.id, auth_pl1_npc1.id])
         self.assertEqual(
-            res3.context['form'].fields['auth_front'].initial,
-            [auth_pl2_ho1.id, auth_pl3_ho1.id])
+            res1.context['form'].fields['PC1_back'].initial,
+            [auth_pl1_pc1.id, auth_pl1_pc2.id, auth_pl1_npc1.id])
+
+        # PC2
         self.assertEqual(
-            res3.context['form'].fields['auth_back'].initial,
-            [auth_pl3_ho1.id])
+            res1.context['form'].fields['PC2_front'].choices,
+            choices_PC2)
+        self.assertEqual(
+            res1.context['form'].fields['PC2_front'].initial,
+            [auth_pl2_pc1.id, auth_pl2_pc2.id, auth_pl2_pc3.id, auth_pl2_npc1.id, auth_pl2_ho1.id])
+        self.assertEqual(
+            res1.context['form'].fields['PC2_back'].initial,
+            [auth_pl2_pc1.id, auth_pl2_pc2.id])
+
+        # PC3
+        self.assertEqual(
+            res1.context['form'].fields['PC3_front'].choices,
+            choices_PC3)
+        self.assertEqual(
+            res1.context['form'].fields['PC3_front'].initial,
+            [auth_pl3_pc1.id, auth_pl3_pc2.id, auth_pl3_pc3.id, auth_pl3_npc1.id, auth_pl3_ho1.id])
+        self.assertEqual(
+            res1.context['form'].fields['PC3_back'].initial,
+            [auth_pl3_pc3.id, auth_pl3_npc1.id, auth_pl3_ho1.id])
 
     def test_post_ok(self):
         """
@@ -929,7 +941,7 @@ class AuthControlViewTest(TestCase):
 
         # PC1とそれに紐づくPLとAuthを作成
         pc1 = HandoutFactory(engawa=gm.engawa, hidden=False)
-        pl1 = PlayerFactory(email=None, engawa=gm.engawa, handout=pc1)
+        pl1 = PlayerFactory(email=None, engawa=gm.engawa, handout=pc1, role=0)
         auth_pl1_pc1 = AuthFactory(player=pl1, handout=pc1, auth_back=True)
 
         # HO1とそれに紐づくPLのAuth
@@ -942,36 +954,32 @@ class AuthControlViewTest(TestCase):
         set_submit_token(c)
         data1 = {
             "submit_token": "test",
-            "auth_front": [f"{auth_pl1_ho1.id}"]
+            "PC1_front": [f"{auth_pl1_pc1.id}", f"{auth_pl1_ho1.id}"]
         }
-        res1 = c.post(f'/auth-control?id={ho1.id}&name=HO1', data1)
-        self.assertRedirects(res1, '/engawa')
+        res1 = c.post(f'/auth-control', data1)
+        self.assertEqual(res1.json(), {'__all__': None})
         self.assertTrue(Auth.objects.get(id=auth_pl1_ho1.id).orig_auth['auth_front'])
         self.assertFalse(Auth.objects.get(id=auth_pl1_ho1.id).orig_auth['auth_back'])
 
         set_submit_token(c)
         data2 = {
             "submit_token": "test",
-            "auth_front": [f"{auth_pl1_ho1.id}"],
-            "auth_back": [f"{auth_pl1_ho1.id}"]
+            "PC1_front": [f"{auth_pl1_pc1.id}", f"{auth_pl1_ho1.id}"],
+            "PC1_back": [f"{auth_pl1_pc1.id}", f"{auth_pl1_ho1.id}"]
         }
-        res2 = c.post(f'/auth-control?id={ho1.id}&name=HO1', data2)
-        self.assertRedirects(res2, '/engawa')
+        res2 = c.post(f'/auth-control', data2)
+        self.assertEqual(res2.json(), {'__all__': None})
         self.assertTrue(Auth.objects.get(id=auth_pl1_ho1.id).orig_auth['auth_front'])
         self.assertTrue(Auth.objects.get(id=auth_pl1_ho1.id).orig_auth['auth_back'])
 
         set_submit_token(c)
         data3 = {
             "submit_token": "test",
+            "PC1_front": [f"{auth_pl1_pc1.id}"],
+            "PC1_back": [f"{auth_pl1_pc1.id}"]
         }
-        res3 = c.post(f'/auth-control?id={ho1.id}&name=HO1', data3)
-        self.assertRedirects(res3, '/engawa')
-        self.assertFalse(Auth.objects.get(id=auth_pl1_ho1.id).orig_auth['auth_front'])
-        self.assertFalse(Auth.objects.get(id=auth_pl1_ho1.id).orig_auth['auth_back'])
-
-        set_submit_token(c)
-        res4 = c.post(f'/auth-control?id={ho1.id}&name=HO1', data3)
-        self.assertRedirects(res4, '/engawa')
+        res3 = c.post(f'/auth-control', data3)
+        self.assertEqual(res3.json(), {'__all__': None})
         self.assertFalse(Auth.objects.get(id=auth_pl1_ho1.id).orig_auth['auth_front'])
         self.assertFalse(Auth.objects.get(id=auth_pl1_ho1.id).orig_auth['auth_back'])
 
@@ -986,7 +994,7 @@ class AuthControlViewTest(TestCase):
 
         # PC1とそれに紐づくPLとAuthを作成
         pc1 = HandoutFactory(engawa=gm.engawa, hidden=False)
-        pl1 = PlayerFactory(email=None, engawa=gm.engawa, handout=pc1)
+        pl1 = PlayerFactory(email=None, engawa=gm.engawa, handout=pc1, role=0)
         auth_pl1_pc1 = AuthFactory(player=pl1, handout=pc1, auth_back=True)
 
         # HO1とそれに紐づくPLのAuth
@@ -998,10 +1006,10 @@ class AuthControlViewTest(TestCase):
 
         data = {
             "submit_token": "test",
-            "auth_front": [f"{auth_pl1_ho1.id}"],
-            "auth_back": [f"{auth_pl1_ho1.id}"]
+            "PC1_front": [f"{auth_pl1_pc1.id}", f"{auth_pl1_ho1.id}"],
+            "PC1_back": [f"{auth_pl1_pc1.id}", f"{auth_pl1_ho1.id}"]
         }
-        res = c.post(f'/auth-control?id={ho1.id}&name=HO1', data)
+        res = c.post(f'/auth-control', data)
         self.assertRedirects(res, '/engawa')
         self.assertFalse(Auth.objects.get(id=auth_pl1_ho1.id).orig_auth['auth_front'])
         self.assertFalse(Auth.objects.get(id=auth_pl1_ho1.id).orig_auth['auth_back'])
