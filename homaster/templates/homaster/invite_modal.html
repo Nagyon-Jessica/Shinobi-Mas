@@ -1,5 +1,5 @@
 <div class="modal-header">
-  <h5 class="modal-title">{{ handout.pl_name }}を招待</h5>
+  <h5 class="modal-title">プレイヤーを招待</h5>
   <button type="button" class="close" data-dismiss="modal" aria-label="Close">
     <span aria-hidden="true">&times;</span>
   </button>
@@ -7,18 +7,23 @@
 
 <div class="modal-body">
   <p>このURLをプレイヤーに共有してください</p>
+  {% for handout in handouts %}
   <div class="card">
     <div class="card-body">
       <div class="row">
-        <div class="col">
-          {{ invite_url }}
+        {% if not handout.0 == 'GM' %}{{ handout.2 }}: {% endif %}{{ handout.0 }}
+      </div>
+      <div class="row">
+        <div class="col" id="url-for-{{ handout.2 }}">
+          {{ handout.1 }}
         </div>
         <div class="col col-auto">
-          <i class="fa fa-paste" data-toggle="tooltip" data-placement="bottom" title="クリックでコピーできます"></i>
+          <i id="cp-btn-{{ handout.2 }}" class="fa fa-paste" data-toggle="tooltip" data-placement="bottom" title="クリックでコピーできます"></i>
         </div>
       </div>
     </div>
   </div>
+  {% endfor %}
 </div>
 
 <div class="modal-footer">

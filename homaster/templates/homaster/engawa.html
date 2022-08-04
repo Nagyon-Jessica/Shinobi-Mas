@@ -18,9 +18,6 @@
 <body>
   <header class="header fixed-top your-auth">
     あなたは<strong>{{ role_name }}</strong>です。
-    {% if player.is_gm %}
-    このENGAWAへ再び出るためのURLは {{ request.scheme }}://{{ request.get_host }}/{{ engawa.uuid }}?p_code={{ player.p_code }} です。
-    {% endif %}
   </header>
   <main class="main main-wrapper">
     <div class="scenario-edit">
@@ -37,12 +34,14 @@
         <div class="col-2">
           <div class="side-menu">
             <ul class="nav flex-column">
+              {% if player.is_gm %}
               <li class="auth-control active"><a href="#">閲覧権限管理</a></li>
-              <li><a href="#">招待URL</a></li>
+              <li class="invite"><a href="#">(再)入室用URL</a></li>
+              {% endif %}
             </ul>
           </div>
         </div>
-        <div class="col">
+        <div class="col-10">
           {% if object_list %}
           <div class="list-group ho-list">
           {% for handout in object_list %}
@@ -62,11 +61,6 @@
                     <a href="{% url 'homaster:update' handout.id %}" class="text-dark" title="編集">
                       <i class="far fa-edit"></i>
                     </a>
-                    {% if handout.type == 1 %}
-                    <span class="invite text-dark" title="プレイヤー招待">
-                      <i class="fas fa-user-plus"></i>
-                    </span>
-                    {% endif %}
                     <span class="delete text-dark" title="削除">
                       <i class="far fa-trash-alt"></i>
                     </span>
@@ -114,11 +108,8 @@
       formURL: "{% url 'homaster:auth-control' %}"
     });
 
-    $(".invite").each(function(index, element){
-      var hoid = $(element).closest('ul').attr("hoid")
-      $(element).modalForm({
-        formURL: "{% url 'homaster:invite' %}?id=" + hoid
-      })
+    $(".invite").modalForm({
+        formURL: "{% url 'homaster:invite' %}"
     });
 
     $(".delete").each(function(index, element){
@@ -132,33 +123,14 @@
 
   // モーダル表示時の初期化処理
   $('#modal').on('shown.bs.modal', function(event){
-    // 表にチェックが付いていない裏を選択不能に
-    $('input[name="auth_front"]').each(function(index){
-      if ($(this).prop('checked') == false){
-        var value = $(this).val();
-        $('input[name=auth_back][value=' + value + ']').prop('disabled', true);
-      }
-    });
     // コピーアイコンのtooltipを有効化
     $('i.fa-paste').tooltip('enable')
   });
 
-  // 非公開ハンドアウトの場合，表がcheckedの時だけ裏を選択可能とする
-  $(document).on("click", 'input[name="auth_front"]',function() {
-    var value = $(this).val();
-    var sel = 'input[name="auth_back"][value=' + value + ']'
-    if ( $(this).prop('checked') == false ) {
-      // 裏だけ公開にならないようチェックを外す
-      $(sel).prop('checked', false);
-      $(sel).prop('disabled', true);
-    } else {
-      $(sel).prop('disabled', false);
-    }
-  });
-
   // mousedown：「コピーしました」tooltip表示
   $(document).on("mousedown", 'i.fa-paste',function() {
-    var url = $(".card-body").text().trim();
+    var ho_name = $(this).attr('id').split('-')[2];
+    var url = $("#url-for-" + ho_name).text().trim();
     navigator.clipboard.writeText(url).then(e => {
       $(this).attr('data-original-title', 'コピーしました！')
              .tooltip('show')

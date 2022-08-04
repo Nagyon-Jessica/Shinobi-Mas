@@ -1,3 +1,4 @@
+from operator import inv
 import pdb
 import logging
 import random
@@ -514,19 +515,34 @@ class InviteView(BSModalFormView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        ho_id = self.request.GET.get('id')
-        handout = Handout.objects.get(id=ho_id)
-        if not handout.pl_name:
-            handout.pl_name = "匿名プレイヤー"
+        engawa = self.request.user.engawa
+        handouts = Handout.objects.filter(engawa=engawa, type=1).order_by('id')
 
-        # 招待用URLを生成
-        invite_url = "https://" + \
+        # ハンドアウトIDとハンドアウト名の対応表
+        ho_names = self.request.session['ho_names']
+
+        context['handouts'] = []
+
+        for handout in handouts:
+            pl_name = "匿名プレイヤー" if not handout.pl_name else handout.pl_name
+            ho_name = ho_names[str(handout.id)]
+
+            # 招待用URLを生成
+            invite_url = "https://" + \
+                self.request.META.get("HTTP_HOST") + \
+                    reverse('homaster:signin', kwargs={"uuid": engawa.uuid}) + \
+                        "?p_code=" + handout.p_code
+
+            context['handouts'].append((pl_name, invite_url, ho_name))
+
+        # GM再入室用URL
+        gm_url = "https://" + \
             self.request.META.get("HTTP_HOST") + \
-                reverse('homaster:signin', kwargs={"uuid": handout.engawa.uuid}) + \
-                    "?p_code=" + handout.p_code
+                reverse('homaster:signin', kwargs={"uuid": engawa.uuid}) + \
+                    "?p_code=" + self.request.user.p_code
 
-        context['handout'] = handout
-        context['invite_url'] = invite_url
+        context['handouts'].append(('GM', gm_url, 'GM'))
+
         return context
 
 class ConfirmDeleteView(BSModalFormView):

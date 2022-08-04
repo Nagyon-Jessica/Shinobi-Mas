@@ -1035,16 +1035,15 @@ class InvitelViewTest(TestCase):
         # 管理画面リロード
         c.get('/engawa')
 
-        res1 = c.get(f'/invite?id={pc1.id}', HTTP_HOST='testserver')
-        self.assertEqual(res1.status_code, 200)
-        self.assertEqual(res1.context['handout'], pc1)
-        self.assertEqual(res1.context['invite_url'], f'https://testserver/{gm.engawa.uuid}?p_code={pc1.p_code}')
+        data = [
+            (pc1.pl_name, f'https://testserver/{gm.engawa.uuid}?p_code={pc1.p_code}', 'PC1'),
+            ('匿名プレイヤー', f'https://testserver/{gm.engawa.uuid}?p_code={pc2.p_code}', 'PC2'),
+            ('GM', f'https://testserver/{gm.engawa.uuid}?p_code={gm.p_code}', 'GM')
+        ]
 
-        res2 = c.get(f'/invite?id={pc2.id}', HTTP_HOST='testserver')
-        self.assertEqual(res2.status_code, 200)
-        self.assertEqual(res2.context['handout'], pc2)
-        self.assertEqual(res2.context['handout'].pl_name, "匿名プレイヤー")
-        self.assertEqual(res2.context['invite_url'], f'https://testserver/{gm.engawa.uuid}?p_code={pc2.p_code}')
+        res1 = c.get(f'/invite', HTTP_HOST='testserver')
+        self.assertEqual(res1.status_code, 200)
+        self.assertEqual(res1.context['handouts'], data)
 
 class ConfirmDeleteViewTest(TestCase):
     def test_get_ok(self):
