@@ -1,5 +1,5 @@
 .scenario-edit{
-  margin: 0px auto;
+  margin: 0px 120px;
   padding: 5px 0px;
 }
 .scenario-edit .scenario-name{
@@ -12,7 +12,7 @@
 .ho-list{
   clear: both;
   width: 1100px;
-  margin: 0px auto;
+  margin: 0;
 }
 .ho-table{
   width: 1080px;
