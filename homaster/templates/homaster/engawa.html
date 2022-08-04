@@ -19,65 +19,65 @@
   <header class="header fixed-top your-auth">
     あなたは<strong>{{ role_name }}</strong>です。
   </header>
-  <main class="main main-wrapper">
-    <div class="scenario-edit">
-      <p class="scenario-name">シナリオ名：{{ engawa.scenario_name }}</p>
+  <main class="main main-wrapper container-fluid">
+    <div class="scenario-edit row">
+      <p class="scenario-name col-8">シナリオ名：{{ engawa.scenario_name }}</p>
       {% if player.is_gm %}
-      <span class="edit-engawa">
-        <button id="create-handout" class="btn btn-primary" type="button">ハンドアウトを追加する</button>
-        <button id="close" class="btn btn-danger">セッションを終了する</button>
-      </span>
+      <button id="create-handout" class="btn btn-primary col" type="button">ハンドアウトを追加する</button>
+      <button id="close" class="btn btn-danger col">セッションを終了する</button>
       {% endif %}
     </div>
-    <div class="container-fluid">
-      <div class="row">
-        <div class="col-2">
-          <div class="side-menu">
-            <ul class="nav flex-column">
-              {% if player.is_gm %}
-              <li class="auth-control active"><a href="#">閲覧権限管理</a></li>
-              <li class="invite"><a href="#">(再)入室用URL</a></li>
-              {% endif %}
-            </ul>
-          </div>
+    <div class="row">
+      {% if player.is_gm %}
+      <div class="col-2">
+        <div class="side-menu">
+          <ul class="nav flex-column">
+            <li class="auth-control active"><a href="#">閲覧権限管理</a></li>
+            <li class="invite"><a href="#">(再)入室用URL</a></li>
+          </ul>
         </div>
-        <div class="col-10">
-          {% if object_list %}
-          <div class="list-group ho-list">
-          {% for handout in object_list %}
-            <ul class="list-group-item" hoid="{{ handout.id }}" honame="{{ handout.ho_name }}">
-              <table class="ho-table">
-                <tr class="ho-table-tanzaku">
-                  <td class="ho-table-id">
-                    <a href="{% url 'homaster:detail' handout.id %}">{{ handout.ho_name }}</a>
-                  </td>
-                  <td class="ho-table-name-type">PC名:</td>
-                  <td class="ho-table-name">{{ handout.pc_name|default_if_none:"（未指定）" }}</td>
-                  <td class="ho-table-front" rowspan="2">{{ handout.front }}</td>
-                </tr>
-                <tr class="ho-table-tanzaku">
-                  <td class="ho-table-edit">
-                    {% if player.is_gm %}
-                    <a href="{% url 'homaster:update' handout.id %}" class="text-dark" title="編集">
-                      <i class="far fa-edit"></i>
-                    </a>
-                    <span class="delete text-dark" title="削除">
-                      <i class="far fa-trash-alt"></i>
-                    </span>
-                    {% endif %}
-                  </td>
-                  <td class="ho-table-name-type">PL名:</td>
-                  <td class="ho-table-name">{{ handout.pl_name|default_if_none:"（未指定）" }}</td>
-                </tr>
-              </table>
-            </ul>
-          {% endfor %}
-          </div>
-          {% endif %}
-          <div class="modal fade" tabindex="-1" role="dialog" id="modal">
-            <div class="modal-dialog" role="document">
-              <div class="modal-content"></div>
-            </div>
+      </div>
+      {% endif %}
+      {% if player.is_gm %}
+      <div class="col-10">
+      {% else %}
+      <div class="col-sm-9 mx-auto">
+      {% endif %}
+        {% if object_list %}
+        <div class="list-group ho-list">
+        {% for handout in object_list %}
+          <ul class="list-group-item" hoid="{{ handout.id }}" honame="{{ handout.ho_name }}">
+            <table class="ho-table">
+              <tr class="ho-table-tanzaku">
+                <td class="ho-table-id">
+                  <a href="{% url 'homaster:detail' handout.id %}">{{ handout.ho_name }}</a>
+                </td>
+                <td class="ho-table-name-type">PC名:</td>
+                <td class="ho-table-name">{{ handout.pc_name|default_if_none:"（未指定）" }}</td>
+                <td class="ho-table-front" rowspan="2">{{ handout.front }}</td>
+              </tr>
+              <tr class="ho-table-tanzaku">
+                <td class="ho-table-edit">
+                  {% if player.is_gm %}
+                  <a href="{% url 'homaster:update' handout.id %}" class="text-dark" title="編集">
+                    <i class="far fa-edit"></i>
+                  </a>
+                  <span class="delete text-dark" title="削除">
+                    <i class="far fa-trash-alt"></i>
+                  </span>
+                  {% endif %}
+                </td>
+                <td class="ho-table-name-type">PL名:</td>
+                <td class="ho-table-name">{{ handout.pl_name|default_if_none:"（未指定）" }}</td>
+              </tr>
+            </table>
+          </ul>
+        {% endfor %}
+        </div>
+        {% endif %}
+        <div class="modal fade" tabindex="-1" role="dialog" id="modal">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content"></div>
           </div>
         </div>
       </div>
