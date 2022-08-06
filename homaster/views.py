@@ -1,22 +1,29 @@
-import uuid, random, string, logging, json
-from itertools import groupby
+from operator import inv
+import pdb
+import logging
+import random
+import string
+import uuid
 from collections import OrderedDict
-from django.urls import reverse, reverse_lazy
-from django.core.mail import send_mail
+from itertools import groupby
+
+from bootstrap_modal_forms.generic import BSModalFormView
 from django.conf import settings
-from django.http import Http404
-from django.forms import fields, CheckboxInput
+from django.contrib.auth import authenticate, login
+from django.core.mail import send_mail
+from django.forms import CheckboxInput, fields
+from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse, reverse_lazy
 from django.views.generic import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, FormView, UpdateView
-from django.contrib.auth import authenticate, login
-from bootstrap_modal_forms.generic import BSModalFormView
 from webpush import send_user_notification
+
+from .constants import *
+from .forms import *
 from .mixins import LoginRequiredCustomMixin
 from .models import *
-from .forms import *
-from .constants import *
 
 logger = logging.getLogger(__name__)
 
@@ -101,6 +108,9 @@ def after_close(request):
 
 def interim(request):
     return render(request, template_name="homaster/interim.html")
+
+def release_notes(request):
+    return render(request, template_name="homaster/release_notes.html")
 
 class IndexView(FormView):
     template_name = 'homaster/index.html'
@@ -411,73 +421,88 @@ class HandoutTypeChoiceView(BSModalFormView):
 
 class AuthControlView(BSModalFormView):
     template_name = 'homaster/auth_control_modal.html'
+    ajax_template_name = 'homaster/auth_control_modal.html'
     form_class = AuthControlForm
     success_url = reverse_lazy("homaster:engawa")
 
     def get_context_data(self, **kwargs):
-        ho_name = self.request.GET.get('name')
-        ho_id = self.request.GET.get('id')
-        handout = Handout.objects.get(id=ho_id)
         submit_token = set_submit_token(self.request)
         context = super().get_context_data(**kwargs)
-        context['ho_name'] = ho_name
-        context['pc_name'] = handout.pc_name
         context['submit_token'] = submit_token
+
+        # ハンドアウトIDとハンドアウト名の対応表
+        ho_names = self.request.session['ho_names']
+
+        engawa = self.request.user.engawa
+        hos = Handout.objects.filter(engawa=engawa).order_by('type', 'id')
+        context['ho_names'] = list(map(lambda h: ho_names[str(h.id)], hos))
         return context
 
     def get_form(self):
         form = super().get_form()
-        ho_id = self.request.GET.get('id')
-        handout = Handout.objects.get(id=ho_id)
-        auths = Auth.objects.filter(handout=handout).order_by('player__id')
+        # ハンドアウトIDとハンドアウト名の対応表
         ho_names = self.request.session['ho_names']
-        choices_front = []
-        choices_back = []
-        if handout.hidden:
-            # 非公開＝NPC/HOなので自身を含む場合を考慮する必要なし
+
+        # ENGAWAに属する全PL（GM以外）を取得
+        engawa = self.request.user.engawa
+        players = Player.objects.filter(engawa=engawa, role=0).order_by('id')
+
+        for pl in players:
+            # PLのHO名
+            ho_name = ho_names[str(pl.handout.id)]
+            auths = Auth.objects.filter(player=pl).order_by('handout__type')
+            # フィールドを動的に生成
+            form.fields[ho_name + "_front"] = MultipleChoiceField(
+                label=ho_name, required=False, widget=CheckboxSelectMultiple)
+            form.fields[ho_name + "_back"] = MultipleChoiceField(
+                label=ho_name, required=False, widget=CheckboxSelectMultiple)
+            # フィールドに選択肢を追加
+            choices = []
             for auth in auths:
-                pc_name = auth.player.handout.pc_name
-                if not pc_name:
-                    pc_name = "未指定"
-                choices_front.append((str(auth.id), f"{ho_names[str(auth.player.handout.id)]}({pc_name})"))
-                choices_back.append((str(auth.id), f"{ho_names[str(auth.player.handout.id)]}({pc_name})"))
-            form.fields['auth_front'].choices = tuple(choices_front)
-            form.fields['auth_front'].initial = [a.id for a in auths if a.auth_front]
-            form.fields['auth_back'].choices = tuple(choices_back)
-            form.fields['auth_back'].initial = [a.id for a in auths if a.auth_back]
-        else:
-            del form.fields['auth_front']
-            for auth in auths:
-                # PCの場合自身を選択肢に含めない
-                if auth.handout.id != auth.player.handout.id:
-                    pc_name = auth.player.handout.pc_name
-                    if not pc_name:
-                        pc_name = "未指定"
-                    choices_back.append((str(auth.id), f"{ho_names[str(auth.player.handout.id)]}({pc_name})"))
-            form.fields['auth_back'].choices = tuple(choices_back)
-            form.fields['auth_back'].initial = [a.id for a in auths if a.handout.id != a.player.handout.id and a.auth_back]
+                # choices.append((str(auth.id), f"{ho_names[str(auth.handout.id)]}"))
+                choices.append((str(auth.id), ""))
+            form.fields[ho_name + "_front"].choices = tuple(choices)
+            form.fields[ho_name + "_back"].choices = tuple(choices)
+            # フィールドの初期値を登録
+            form.fields[ho_name + "_front"].initial = [a.id for a in auths if a.auth_front]
+            form.fields[ho_name + "_back"].initial = [a.id for a in auths if a.auth_back]
+
         return form
 
     def form_valid(self, form):
-        choices = form.fields['auth_back']._choices
+        # チェックがついたAuth IDの一覧を取得
+        back_choiced = list(map(lambda k: form.data.getlist(k), filter(lambda key: "_back" in key, self.request.POST.keys())))
+        back_choiced = sum(back_choiced, [])
+        front_choiced = list(map(lambda k: form.data.getlist(k), filter(lambda key: "_front" in key, self.request.POST.keys())))
+        front_choiced = sum(front_choiced, [])
+        
+        # チェックボックス全体の配列
+        choices = []
+        for key, field in form.fields.items():
+            if "_back" in key:
+                choices += field._choices
+
         ho_names = self.request.session['ho_names']
         for choice in choices:
             auth = Auth.objects.get(id=int(choice[0]))
-            kwargs = {}
-            # 裏が公開なら自動的に表も公開と決まる
-            if choice[0] in self.request.POST.getlist("auth_back"):
-                kwargs = {"auth_front": True, "auth_back": True}
-            else:
-                kwargs['auth_back'] = False
-                if 'auth_front' in form.fields.keys():
-                    kwargs['auth_front'] = choice[0] in self.request.POST.getlist("auth_front")
-                else:
-                    kwargs['auth_front'] = True
+            kwargs = {
+                "auth_front": choice[0] in front_choiced,
+                "auth_back": choice[0] in back_choiced
+            }
+            # print(f"id: {choice[0]}, kwargs: {kwargs}, orig: {auth.orig_auth}")
             # 権限の変更があればDBを更新し，対象PLにプッシュ通知を送信
             if kwargs != auth.orig_auth:
                 Auth.objects.filter(id=int(choice[0])).update(**kwargs)
                 send_push(auth, ho_names[str(auth.handout.id)])
-        return redirect("homaster:engawa")
+        return JsonResponse({'__all__': None})
+
+    def form_invalid(self, form):
+        error_dict = form.errors.as_data()
+        # ValidationErrorにstr()を適用すると['***']のような文字列が返るので，不要な部分を削除
+        error_dict['__all__'] = list(map(lambda e: str(e).strip("[]'"), error_dict['__all__']))
+        # submit_tokenをセットし直すためレスポンスに含める
+        token = set_submit_token(self.request)
+        return JsonResponse({'err_msg': error_dict['__all__'], 'submit_token': token})
 
     def post(self, request):
         if not exists_submit_token(request):
@@ -490,19 +515,34 @@ class InviteView(BSModalFormView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        ho_id = self.request.GET.get('id')
-        handout = Handout.objects.get(id=ho_id)
-        if not handout.pl_name:
-            handout.pl_name = "匿名プレイヤー"
+        engawa = self.request.user.engawa
+        handouts = Handout.objects.filter(engawa=engawa, type=1).order_by('id')
 
-        # 招待用URLを生成
-        invite_url = "https://" + \
+        # ハンドアウトIDとハンドアウト名の対応表
+        ho_names = self.request.session['ho_names']
+
+        context['handouts'] = []
+
+        for handout in handouts:
+            pl_name = "匿名プレイヤー" if not handout.pl_name else handout.pl_name
+            ho_name = ho_names[str(handout.id)]
+
+            # 招待用URLを生成
+            invite_url = "https://" + \
+                self.request.META.get("HTTP_HOST") + \
+                    reverse('homaster:signin', kwargs={"uuid": engawa.uuid}) + \
+                        "?p_code=" + handout.p_code
+
+            context['handouts'].append((pl_name, invite_url, ho_name))
+
+        # GM再入室用URL
+        gm_url = "https://" + \
             self.request.META.get("HTTP_HOST") + \
-                reverse('homaster:signin', kwargs={"uuid": handout.engawa.uuid}) + \
-                    "?p_code=" + handout.p_code
+                reverse('homaster:signin', kwargs={"uuid": engawa.uuid}) + \
+                    "?p_code=" + self.request.user.p_code
 
-        context['handout'] = handout
-        context['invite_url'] = invite_url
+        context['handouts'].append(('GM', gm_url, 'GM'))
+
         return context
 
 class ConfirmDeleteView(BSModalFormView):

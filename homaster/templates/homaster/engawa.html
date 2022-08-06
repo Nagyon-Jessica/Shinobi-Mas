@@ -18,63 +18,68 @@
 <body>
   <header class="header fixed-top your-auth">
     あなたは<strong>{{ role_name }}</strong>です。
-    {% if player.is_gm %}
-    このENGAWAへ再び出るためのURLは {{ request.scheme }}://{{ request.get_host }}/{{ engawa.uuid }}?p_code={{ player.p_code }} です。
-    {% endif %}
   </header>
-  <main class="main main-wrapper">
-    <div class="scenario-edit">
-      <p class="scenario-name">シナリオ名：{{ engawa.scenario_name }}</p>
+  <main class="main main-wrapper container-fluid">
+    <div class="scenario-edit row">
+      <p class="scenario-name col-8">シナリオ名：{{ engawa.scenario_name }}</p>
       {% if player.is_gm %}
-      <span class="edit-engawa">
-        <button id="create-handout" class="btn btn-primary" type="button">ハンドアウトを追加する</button>
-        <button id="close" class="btn btn-danger">セッションを終了する</button>
-      </span>
+      <button id="create-handout" class="btn btn-primary col" type="button">ハンドアウトを追加する</button>
+      <button id="close" class="btn btn-danger col">セッションを終了する</button>
       {% endif %}
     </div>
-    {% if object_list %}
-    <div class="list-group ho-list">
-    {% for handout in object_list %}
-      <ul class="list-group-item" hoid="{{ handout.id }}" honame="{{ handout.ho_name }}">
-        <table class="ho-table">
-          <tr class="ho-table-tanzaku">
-            <td class="ho-table-id">
-              <a href="{% url 'homaster:detail' handout.id %}">{{ handout.ho_name }}</a>
-            </td>
-            <td class="ho-table-name-type">PC名:</td>
-            <td class="ho-table-name">{{ handout.pc_name|default_if_none:"（未指定）" }}</td>
-            <td class="ho-table-front" rowspan="2">{{ handout.front }}</td>
-          </tr>
-          <tr class="ho-table-tanzaku">
-            <td class="ho-table-edit">
-              {% if player.is_gm %}
-              <a href="{% url 'homaster:update' handout.id %}" class="text-dark" title="編集">
-                <i class="far fa-edit"></i>
-              </a>
-              <span class="auth-control text-dark" title="閲覧権限管理">
-                <i class="far fa-eye"></i>
-              </span>
-              {% if handout.type == 1 %}
-              <span class="invite text-dark" title="プレイヤー招待">
-                <i class="fas fa-user-plus"></i>
-              </span>
-              {% endif %}
-              <span class="delete text-dark" title="削除">
-                <i class="far fa-trash-alt"></i>
-              </span>
-              {% endif %}
-            </td>
-            <td class="ho-table-name-type">PL名:</td>
-            <td class="ho-table-name">{{ handout.pl_name|default_if_none:"（未指定）" }}</td>
-          </tr>
-        </table>
-      </ul>
-    {% endfor %}
-    </div>
-    {% endif %}
-    <div class="modal fade" tabindex="-1" role="dialog" id="modal">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content"></div>
+    <div class="row">
+      {% if player.is_gm %}
+      <div class="col-2">
+        <div class="side-menu">
+          <ul class="nav flex-column">
+            <li class="auth-control active"><a href="#">閲覧権限管理</a></li>
+            <li class="invite"><a href="#">(再)入室用URL</a></li>
+          </ul>
+        </div>
+      </div>
+      {% endif %}
+      {% if player.is_gm %}
+      <div class="col-10">
+      {% else %}
+      <div class="col-sm-9 mx-auto">
+      {% endif %}
+        {% if object_list %}
+        <div class="list-group ho-list">
+        {% for handout in object_list %}
+          <ul class="list-group-item" hoid="{{ handout.id }}" honame="{{ handout.ho_name }}">
+            <table class="ho-table">
+              <tr class="ho-table-tanzaku">
+                <td class="ho-table-id">
+                  <a href="{% url 'homaster:detail' handout.id %}">{{ handout.ho_name }}</a>
+                </td>
+                <td class="ho-table-name-type">PC名:</td>
+                <td class="ho-table-name">{{ handout.pc_name|default_if_none:"（未指定）" }}</td>
+                <td class="ho-table-front" rowspan="2">{{ handout.front }}</td>
+              </tr>
+              <tr class="ho-table-tanzaku">
+                <td class="ho-table-edit">
+                  {% if player.is_gm %}
+                  <a href="{% url 'homaster:update' handout.id %}" class="text-dark" title="編集">
+                    <i class="far fa-edit"></i>
+                  </a>
+                  <span class="delete text-dark" title="削除">
+                    <i class="far fa-trash-alt"></i>
+                  </span>
+                  {% endif %}
+                </td>
+                <td class="ho-table-name-type">PL名:</td>
+                <td class="ho-table-name">{{ handout.pl_name|default_if_none:"（未指定）" }}</td>
+              </tr>
+            </table>
+          </ul>
+        {% endfor %}
+        </div>
+        {% endif %}
+        <div class="modal fade" tabindex="-1" role="dialog" id="modal">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content"></div>
+          </div>
+        </div>
       </div>
     </div>
   </main>
@@ -99,19 +104,12 @@
         formURL: "{% url 'homaster:create-handout' %}"
     });
 
-    $(".auth-control").each(function(index, element){
-      var hoid = $(element).closest('ul').attr("hoid")
-      var honame = $(element).closest('ul').attr("honame")
-      $(element).modalForm({
-        formURL: "{% url 'homaster:auth-control' %}?id=" + hoid + "&name=" + honame
-      })
+    $(".auth-control").modalForm({
+      formURL: "{% url 'homaster:auth-control' %}"
     });
 
-    $(".invite").each(function(index, element){
-      var hoid = $(element).closest('ul').attr("hoid")
-      $(element).modalForm({
-        formURL: "{% url 'homaster:invite' %}?id=" + hoid
-      })
+    $(".invite").modalForm({
+        formURL: "{% url 'homaster:invite' %}"
     });
 
     $(".delete").each(function(index, element){
@@ -125,33 +123,14 @@
 
   // モーダル表示時の初期化処理
   $('#modal').on('shown.bs.modal', function(event){
-    // 表にチェックが付いていない裏を選択不能に
-    $('input[name="auth_front"]').each(function(index){
-      if ($(this).prop('checked') == false){
-        var value = $(this).val();
-        $('input[name=auth_back][value=' + value + ']').prop('disabled', true);
-      }
-    });
     // コピーアイコンのtooltipを有効化
     $('i.fa-paste').tooltip('enable')
   });
 
-  // 非公開ハンドアウトの場合，表がcheckedの時だけ裏を選択可能とする
-  $(document).on("click", 'input[name="auth_front"]',function() {
-    var value = $(this).val();
-    var sel = 'input[name="auth_back"][value=' + value + ']'
-    if ( $(this).prop('checked') == false ) {
-      // 裏だけ公開にならないようチェックを外す
-      $(sel).prop('checked', false);
-      $(sel).prop('disabled', true);
-    } else {
-      $(sel).prop('disabled', false);
-    }
-  });
-
   // mousedown：「コピーしました」tooltip表示
   $(document).on("mousedown", 'i.fa-paste',function() {
-    var url = $(".card-body").text().trim();
+    var ho_name = $(this).attr('id').split('-')[2];
+    var url = $("#url-for-" + ho_name).text().trim();
     navigator.clipboard.writeText(url).then(e => {
       $(this).attr('data-original-title', 'コピーしました！')
              .tooltip('show')
