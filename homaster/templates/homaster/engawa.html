@@ -20,7 +20,7 @@
     あなたは<strong>{{ role_name }}</strong>です。
   </header>
   <main class="main main-wrapper container-fluid">
-    <div class="scenario-edit row">
+    <div class="scenario-edit row flex-nowrap">
       <p class="scenario-name col-8">シナリオ名：{{ engawa.scenario_name }}</p>
       {% if player.is_gm %}
       <button id="create-handout" class="btn btn-primary col" type="button">ハンドアウトを追加する</button>
@@ -83,7 +83,7 @@
       </div>
     </div>
   </main>
-  <footer class="footer fixed-bottom">
+  <footer class="footer absolute-bottom">
     <div class="container">
       <p class="text-muted text-center">
         © 2021-2022 Shinobi-Mas<br>
