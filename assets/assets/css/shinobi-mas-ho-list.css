@@ -14,7 +14,7 @@
   margin: 0;
 }
 .ho-table{
-  width: 1080px;
+  /* width: 1080px; */
   margin: 0px auto;
 }
 .ho-table .ho-table-tanzaku{
@@ -40,6 +40,6 @@
   width: 150px;
   vertical-align: middle;
 }
-.ho-table .ho-table-tanzaku .ho-table-front{
+/* .ho-table .ho-table-tanzaku .ho-table-front{
   width: 750px;
-}
+} */
