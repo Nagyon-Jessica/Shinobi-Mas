@@ -816,12 +816,14 @@ class HandoutTypeChoiceViewTest(TestCase):
 class AuthControlViewTest(TestCase):
     def test_get_ok(self):
         """
-        GMが閲覧権限更新モーダルを表示できる
+        GM, PLが閲覧権限更新モーダルを表示できる
         PC1: PC2 ○, PC3 x
         PC2: PC1 ○, PC3 x
         PC3: PC1 x, PC2 x
         NPC1(公開): PC1 裏○, PC2 裏x, PC3 裏○
         HO1(非公開): PC1 x, PC2 表○, PC3 裏○
+
+        PLの場合は1行のみ, チェックボックスが無効なことも確認。
         """
         # ログイン
         c = self.client
@@ -864,7 +866,7 @@ class AuthControlViewTest(TestCase):
         c.get('/engawa')
 
         # モーダル表示
-        res1 = c.get(f'/auth-control')
+        res1 = c.get('/auth-control')
         self.assertEqual(res1.status_code, 200)
 
         # context確認
@@ -928,6 +930,27 @@ class AuthControlViewTest(TestCase):
         self.assertEqual(
             res1.context['form'].fields['PC3_back'].initial,
             [auth_pl3_pc3.id, auth_pl3_npc1.id, auth_pl3_ho1.id])
+
+        # PL(PC1)テスト
+        url_pc1 = f'/{gm.engawa.uuid}?p_code={pc1.p_code}'
+        # PC1でログイン
+        res2 = c.get(url_pc1)
+        self.assertRedirects(res2, '/engawa')
+        # モーダルを開く
+        res3 = c.get('/auth-control')
+        self.assertEqual(res3.status_code, 200)
+        # 選択肢，初期値，disabledの確認
+        self.assertEqual(
+            res3.context['form'].fields['PC1_front'].choices,
+            choices_PC1)
+        self.assertEqual(
+            res3.context['form'].fields['PC1_front'].initial,
+            [auth_pl1_pc1.id, auth_pl1_pc2.id, auth_pl1_pc3.id, auth_pl1_npc1.id])
+        self.assertEqual(
+            res3.context['form'].fields['PC1_back'].initial,
+            [auth_pl1_pc1.id, auth_pl1_pc2.id, auth_pl1_npc1.id])
+        self.assertTrue(res3.context['form'].fields['PC1_front'].disabled)
+        self.assertTrue(res3.context['form'].fields['PC1_back'].disabled)
 
     def test_post_ok(self):
         """

@@ -2,7 +2,11 @@
   {% csrf_token %}
 
   <div class="modal-header">
+    {% if user.is_gm %}
     <h5 class="modal-title">閲覧権限の管理</h5>
+    {% else %}
+    <h5 class="modal-title">閲覧権限の確認</h5>
+    {% endif %}
     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
       <span aria-hidden="true">&times;</span>
     </button>
@@ -75,9 +79,13 @@
   <div id="error_message"></div>
 
   <div class="modal-footer">
+    {% if user.is_gm %}
     <input id="token" type="hidden" name="submit_token" value="{{ submit_token }}"/>
     <button type="button" class="btn btn-default" data-dismiss="modal">キャンセル</button>
     <input type="submit" id="submit_button" class="btn btn-primary"></input>
+    {% else %}
+    <button type="button" class="btn btn-default" data-dismiss="modal">閉じる</button>
+    {% endif %}
   </div>
 </form>
 
