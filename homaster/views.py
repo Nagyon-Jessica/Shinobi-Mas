@@ -444,7 +444,8 @@ class AuthControlView(BSModalFormView):
         ho_names = self.request.session['ho_names']
 
         # ENGAWAに属する全PL（GM以外）を取得
-        engawa = self.request.user.engawa
+        user = self.request.user
+        engawa = user.engawa
         players = Player.objects.filter(engawa=engawa, role=0).order_by('id')
 
         for pl in players:
@@ -452,10 +453,12 @@ class AuthControlView(BSModalFormView):
             ho_name = ho_names[str(pl.handout.id)]
             auths = Auth.objects.filter(player=pl).order_by('handout__type')
             # フィールドを動的に生成
+            # PL画面の場合チェックボックスをdisabledにする
             form.fields[ho_name + "_front"] = MultipleChoiceField(
-                label=ho_name, required=False, widget=CheckboxSelectMultiple)
+                label=ho_name, required=False, widget=CheckboxSelectMultiple, disabled=(not user.is_gm))
             form.fields[ho_name + "_back"] = MultipleChoiceField(
-                label=ho_name, required=False, widget=CheckboxSelectMultiple)
+                label=ho_name, required=False, widget=CheckboxSelectMultiple, disabled=(not user.is_gm))
+
             # フィールドに選択肢を追加
             choices = []
             for auth in auths:
