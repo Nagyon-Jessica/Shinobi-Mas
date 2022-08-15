@@ -837,18 +837,18 @@ class AuthControlViewTest(TestCase):
         # PC2とそれに紐づくPLとAuthを作成
         pc2 = HandoutFactory(engawa=gm.engawa, hidden=False)
         pl2 = PlayerFactory(email=None, engawa=gm.engawa, handout=pc2, role=0)
-        auth_pl2_pc1 = AuthFactory(player=pl2, handout=pc2, auth_back=True)
+        auth_pl2_pc1 = AuthFactory(player=pl2, handout=pc1, auth_back=True)
         auth_pl1_pc2 = AuthFactory(player=pl1, handout=pc2, auth_back=True)
-        auth_pl2_pc2 = AuthFactory(player=pl2, handout=pc1, auth_back=True)
+        auth_pl2_pc2 = AuthFactory(player=pl2, handout=pc2, auth_back=True)
 
         # PC3とそれに紐づくPLとAuthを作成
         pc3 = HandoutFactory(engawa=gm.engawa, hidden=False)
         pl3 = PlayerFactory(email=None, engawa=gm.engawa, handout=pc3, role=0)
         auth_pl3_pc1 = AuthFactory(player=pl3, handout=pc1, auth_back=False)
         auth_pl3_pc2 = AuthFactory(player=pl3, handout=pc2, auth_back=False)
-        auth_pl3_pc3 = AuthFactory(player=pl3, handout=pc3, auth_back=True)
         auth_pl1_pc3 = AuthFactory(player=pl1, handout=pc3, auth_back=False)
         auth_pl2_pc3 = AuthFactory(player=pl2, handout=pc3, auth_back=False)
+        auth_pl3_pc3 = AuthFactory(player=pl3, handout=pc3, auth_back=True)
 
         # NPC1とそれに紐づくPLのAuth
         npc1 = HandoutFactory(engawa=gm.engawa, hidden=False, type=2)
