@@ -300,14 +300,14 @@ class CreateHandoutView(LoginRequiredCustomMixin, CreateView):
         # PCを作成する場合，紐づくPLと，そのPLの既存ハンドアウトに対する権限レコードを作成する
         if is_pc:
             player, _ = Player.objects.get_or_create(engawa=engawa, handout=self.object, p_code=code, role=0)
-            handouts = Handout.objects.filter(engawa=engawa)
+            handouts = Handout.objects.filter(engawa=engawa).order_by('id')
             for ho in handouts:
                 if ho == self.object:
                     continue
                 Auth.objects.create(player=player, handout=ho, auth_front=bool(not ho.hidden), auth_back=False)
 
         # PLが存在する場合，作成するハンドアウトについてのAuthレコードを作成する
-        players = Player.objects.filter(engawa=engawa, role=0)
+        players = Player.objects.filter(engawa=engawa, role=0).order_by('id')
         is_hidden = getattr(handout, 'hidden', False)
         if is_pc:
             # PCの場合，PLがハンドアウトの所有者の時のみ裏を公開
@@ -451,7 +451,7 @@ class AuthControlView(BSModalFormView):
         for pl in players:
             # PLのHO名
             ho_name = ho_names[str(pl.handout.id)]
-            auths = Auth.objects.filter(player=pl).order_by('handout__type')
+            auths = Auth.objects.filter(player=pl).order_by('handout__type', 'handout__id')
             print(list(map(lambda a: a.handout.id, auths)))
             # フィールドを動的に生成
             # PL画面の場合チェックボックスをdisabledにする
