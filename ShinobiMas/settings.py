@@ -189,6 +189,12 @@ else:
             # }
         },
         'loggers': {
+            '': {
+                'handlers': [
+                    'console',
+                    ],
+                'level': 'INFO',
+            },
             'django': {
                 'handlers': [
                     'console',
