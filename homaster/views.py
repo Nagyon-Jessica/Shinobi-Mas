@@ -452,6 +452,7 @@ class AuthControlView(BSModalFormView):
             # PLのHO名
             ho_name = ho_names[str(pl.handout.id)]
             auths = Auth.objects.filter(player=pl).order_by('handout__type')
+            logger.info(list(map(lambda a: a.handout.id, auths)))
             # フィールドを動的に生成
             # PL画面の場合チェックボックスをdisabledにする
             form.fields[ho_name + "_front"] = MultipleChoiceField(
