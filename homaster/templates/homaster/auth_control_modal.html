@@ -2,28 +2,141 @@
   {% csrf_token %}
 
   <div class="modal-header">
+    {% if user.is_gm %}
     <h5 class="modal-title">閲覧権限の管理</h5>
+    {% else %}
+    <h5 class="modal-title">閲覧権限の確認</h5>
+    {% endif %}
     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
       <span aria-hidden="true">&times;</span>
     </button>
   </div>
 
-  <div class="modal-body">
-    <p>{{ ho_name }}({{ pc_name|default_if_none:"未指定" }})に対する閲覧権限を付与します</p>
-    {% for field in form %}
-    <div class="form-group{% if field.errors %} invalid{% endif %}">
-      <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-      {{ field }}
-      {% for error in field.errors %}
-      <p class="help-block">{{ error }}</p>
-      {% endfor %}
+  <div class="modal-body" style="width: auto; overflow-x: auto;">
+    <ul class="nav nav-tabs">
+      <li class="nav-item">
+        <a href="#table1" class="nav-link active" data-toggle="tab">表</a>
+      </li>
+      <li class="nav-item">
+        <a href="#table2" class="nav-link" data-toggle="tab">裏</a>
+      </li>
+    </ul>
+    <div class="tab-content">
+      <div id="table1" class="tab-pane active">
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">閲覧者</th>
+              {% for ho_name in ho_names %}
+              <th scope="col">{{ ho_name }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for field in form %}
+              {% if "front" in field.name %}
+                <tr>
+                  <th scope="col">{{  field.label  }}</th>
+                  {% for choice in field %}
+                  <td>
+                    {{ choice }}
+                  </td>
+                  {% endfor %}
+                </tr>
+              {% endif %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div id="table2" class="tab-pane">
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">閲覧者</th>
+              {% for ho_name in ho_names %}
+              <th scope="col">{{ ho_name }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for field in form %}
+              {% if "back" in field.name %}
+                <tr>
+                  <th scope="col">{{  field.label  }}</th>
+                  {% for choice in field %}
+                  <td>
+                    {{ choice }}
+                  </td>
+                  {% endfor %}
+                </tr>
+              {% endif %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     </div>
-    {% endfor %}
   </div>
+  <div id="error_message"></div>
 
   <div class="modal-footer">
-    <input type="hidden" name="submit_token" value="{{ submit_token }}"/>
+    {% if user.is_gm %}
+    <input id="token" type="hidden" name="submit_token" value="{{ submit_token }}"/>
     <button type="button" class="btn btn-default" data-dismiss="modal">キャンセル</button>
-    <button type="submit" class="btn btn-primary">更新</button>
+    <input type="submit" id="submit_button" class="btn btn-primary"></input>
+    {% else %}
+    <button type="button" class="btn btn-default" data-dismiss="modal">閉じる</button>
+    {% endif %}
   </div>
 </form>
+
+<script>
+  $("#submit_button").click(function(event) {
+    // モーダルオープン時にセットされたフォームへのイベントハンドラを削除
+    $("form").off();
+
+    $("form").submit(function(e) {
+      // HTMLでの送信をキャンセル
+      e.preventDefault();
+
+      // 多重リクエスト防止
+      if (e.isTrigger !== undefined) {
+        return false
+      }
+
+      var $form = $(this);
+      var $button = $form.find('button');
+
+      $.ajax({
+        type: $form.attr('method'),
+        url: $form.attr('action'),
+        data: $form.serialize(),
+        beforeSend: function() {
+          // ボタンを無効化し、二重送信を防止
+          $button.attr('disabled', true);
+        },
+        complete: function(xhr, textStatus) {
+          // ボタンを有効化し、再送信を許可
+          $button.attr('disabled', false);
+        },
+        success: function(result, textStatus, xhr) {
+          console.log(result);
+          if (result.submit_token) {
+            // バリデーションエラー時
+            console.log('Validation Error')
+            var err = $('#error_message');
+            err.addClass("alert alert-warning");
+            err.attr({'role': 'alert'});
+            err.text(result.err_msg.join('<br>'));
+
+            // 再submitできるようsubmit_tokenを再セット
+            var token = $('#token');
+            token.attr({'value': result.submit_token});
+          } else {
+            // 登録成功後
+            $('#modal').modal('hide');
+          }
+        }
+      });
+    })
+  });
+</script>

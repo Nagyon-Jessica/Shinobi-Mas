@@ -19,6 +19,7 @@ urlpatterns = [
     path('delete', views.delete, name='delete'),
     path('delete-handout', views.ConfirmDeleteView.as_view(), name='delete-handout'),
     path('close-success', views.after_close, name='close-success'),
+    path('release-notes', views.release_notes, name='release-notes'),
     path('<uuid>', views.signin, name='signin'),
     path('', RedirectView.as_view(pattern_name="homaster:index")),
 ]

@@ -3,21 +3,39 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>ENGAWA再訪</title>
+  <title>リリースノート</title>
   <link rel="icon" type="image/png" href="{% static 'favicon.ico' %}">
   <link rel="stylesheet" href="{% static 'assets/css/bootstrap.css' %}">
   <link rel="stylesheet" href="{% static 'assets/css/shinobi-mas-common.css' %}">
 </head>
 <body>
   <main class="main main-wrapper">
-    <div class="text-center">
-      <form method="post">{% csrf_token %}
-        {{ form.as_p }}
-        <input type="submit" class="btn" value="メールを送信する">
-      </form>
-    </div>
     <div class="return-buttom">
       <a class="btn btn-secondary" href="{% url 'homaster:index' %}">戻る</a>
+    </div>
+    <div class="version-block">
+      <h2>
+        Ver. 0.2.0（γ）
+      </h2>
+      <div class="version-block-body">
+        Released on 2022/08/13
+        <ul>
+          <li>リリースノートを作成</li>
+          <li>閲覧権限管理テーブルを実装</li>
+          <li>招待URLの表示を集約化</li>
+        </ul>
+      </div>
+    </div>
+    <div class="version-block">
+      <h2>
+        Ver. 0.1.0（β）
+      </h2>
+      <div class="version-block-body">
+        Released on 2021/09/30
+        <ul>
+          <li>Shinobi-Mas(β)をリリース</li>
+        </ul>
+      </div>
     </div>
   </main>
   <footer class="footer absolute-bottom">

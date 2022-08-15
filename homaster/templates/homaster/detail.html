@@ -23,29 +23,29 @@
       <div>
         <form action="" method="POST">
           {% csrf_token %}
-          <table class="ho-detail-table">
-            <tr>
-              <td class="ho-detail-table-col">PC名 </td>
-              <td class="ho-detail-table-charf">
+          <table class="ho-detail-table container">
+            <tr class="row">
+              <td class="ho-detail-table-col col-1">PC名 </td>
+              <td class="ho-detail-table-charf col">
                 <input type="text" name="pc_name" value="{{ handout.pc_name|default_if_none:"（未指定）" }}" maxlength="100" readonly>
               </td>
               <td></td>
             </tr>
-            <tr>
-              <td class="ho-detail-table-col">PL名 </td>
-              <td colspan=2>
+            <tr class="row">
+              <td class="ho-detail-table-col col-1">PL名 </td>
+              <td class="col">
                 <input type="text" name="pc_name" value="{{ handout.pl_name|default_if_none:"（未指定）" }}" maxlength="100" readonly>
               </td>
             </tr>
-            <tr class="ho-detail-table-textf">
-              <td class="ho-detail-table-col">使命(表)</td>
-              <td colspan=2>
+            <tr class="ho-detail-table-textf row">
+              <td class="ho-detail-table-col col-1">使命(表)</td>
+              <td class="col">
                 <textarea cols="40" rows="10" maxlength="1000" readonly>{{ handout.front }}</textarea>
               </td>
             </tr>
-            <tr class="ho-detail-table-textf">
-              <td class="ho-detail-table-col">秘密(裏)</td>
-              <td colspan=2>
+            <tr class="ho-detail-table-textf row">
+              <td class="ho-detail-table-col col-1">秘密(裏)</td>
+              <td class="col">
                 {% if allowed %}
                 <textarea cols="40" rows="10" maxlength="1000" readonly>{{ handout.back }}</textarea>
                 {% else %}
@@ -59,10 +59,10 @@
       </div>
     </div>
   </main>
-  <footer class="footer fixed-bottom">
+  <footer class="footer absolute-bottom">
     <div class="container">
       <p class="text-muted text-center">
-        © 2021 Shinobi-Mas<br>
+        © 2021-2022 Shinobi-Mas<br>
         お問い合わせはこちら→ shinobimas.master@gmail.com
       </p>
     </div>

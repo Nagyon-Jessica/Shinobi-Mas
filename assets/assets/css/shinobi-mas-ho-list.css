@@ -1,6 +1,6 @@
 .scenario-edit{
-  margin: 0px auto;
-  padding: 5px 120px;
+  margin: 0px 120px;
+  padding: 5px 0px;
 }
 .scenario-edit .scenario-name{
   float: left;
@@ -11,11 +11,10 @@
 }
 .ho-list{
   clear: both;
-  width: 1100px;
-  margin: 0px auto;
+  margin: 0;
 }
 .ho-table{
-  width: 1080px;
+  /* width: 1080px; */
   margin: 0px auto;
 }
 .ho-table .ho-table-tanzaku{
@@ -41,6 +40,6 @@
   width: 150px;
   vertical-align: middle;
 }
-.ho-table .ho-table-tanzaku .ho-table-front{
+/* .ho-table .ho-table-tanzaku .ho-table-front{
   width: 750px;
-}
+} */

@@ -1,4 +1,3 @@
-import logging
 from django import forms
 from django.core.mail import send_mail
 from django.forms.fields import CharField, ChoiceField, EmailField, MultipleChoiceField
@@ -42,5 +41,20 @@ class HandoutForm(forms.ModelForm):
         fields = ('type', 'pc_name', 'pl_name', 'front', 'back')
 
 class AuthControlForm(BSModalForm):
-    auth_front = MultipleChoiceField(label="使命(表)", required=False, widget=CheckboxSelectMultiple)
-    auth_back = MultipleChoiceField(label="秘密(裏)", required=False, widget=CheckboxSelectMultiple)
+    def clean(self):
+        # print(self.has_changed())
+        # 変更がなければエラーを返す
+        if not self.has_changed():
+            raise forms.ValidationError("変更がありません")
+
+        cleaned_data = super(AuthControlForm, self).clean()
+        # 裏だけにチェックがついているものがあればエラーを返す
+        # PCx_backがPCx_frontの部分集合でなければエラー
+        for k, v in cleaned_data.items():
+            if "_back" in k:
+                honame = k.split("_")[0]
+                front = cleaned_data[f'{honame}_front']
+                if not set(v).issubset(set(front)):
+                    raise forms.ValidationError("裏だけを公開することはできません")
+
+        return cleaned_data
