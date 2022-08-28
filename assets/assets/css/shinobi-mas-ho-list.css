@@ -43,3 +43,7 @@
 /* .ho-table .ho-table-tanzaku .ho-table-front{
   width: 750px;
 } */
+
+.fa-trash-alt {
+  cursor: pointer;
+}
