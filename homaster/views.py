@@ -1,11 +1,12 @@
-from operator import inv
-import pdb
 import logging
+import os
+import pdb
 import random
 import string
 import uuid
 from collections import OrderedDict
 from itertools import groupby
+from operator import inv
 
 from bootstrap_modal_forms.generic import BSModalFormView
 from django.conf import settings
@@ -116,6 +117,11 @@ class IndexView(FormView):
     template_name = 'homaster/index.html'
     form_class = IndexForm
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['env'] = os.environ.get('SYSTEM_ENV', None)
+        return context
+
     def form_valid(self, form):
         scenario_name = form.cleaned_data["scenario_name"]
         email = form.cleaned_data["email"]
@@ -214,6 +220,7 @@ class EngawaView(LoginRequiredCustomMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['env'] = os.environ.get('SYSTEM_ENV', None)
         engawa = self.request.user.engawa
         player = Player.objects.get(engawa=engawa, p_code=self.request.user.p_code)
         context["engawa"] = engawa
