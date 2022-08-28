@@ -13,12 +13,13 @@
     <div class="text-center">
       <form method="post">{% csrf_token %}
         {{ form.as_p }}
-        <input type="submit" class="btn" value="メールを送信する">
+        <input type="submit" class="btn btn-primary" value="メールを送信する">
+        <a class="btn btn-secondary" href="{% url 'homaster:index' %}">戻る</a>
       </form>
     </div>
-    <div class="return-buttom">
+    <!-- <div class="return-buttom">
       <a class="btn btn-secondary" href="{% url 'homaster:index' %}">戻る</a>
-    </div>
+    </div> -->
   </main>
   <footer class="footer absolute-bottom">
     <div class="container">

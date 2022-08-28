@@ -4,6 +4,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="user_id" content="{{ player.id }}">
+  {% if env == 'prod' %}
+  <meta name="google-site-verification" content="qz6e3pmPrXwVVM2Oy7gfTzmF2dBw3ks5MMbKXH19_jo" />
+  <script async defer data-website-id="c2e6030c-a622-4118-81dc-e15ceb84de0d" src="https://shinobi-mas-analytics.herokuapp.com/umami.js"></script>
+  {% endif %}
   <title>{{ engawa.scenario_name }} - Shinobi-Mas</title>
   <link rel="icon" type="image/png" href="{% static 'favicon.ico' %}">
   <link rel="stylesheet" href="{% static 'assets/css/bootstrap.css' %}">
