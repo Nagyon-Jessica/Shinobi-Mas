@@ -4,6 +4,7 @@ from . import views
 
 app_name = 'homaster'
 urlpatterns = [
+    # path('<int>', views.signin, name='signin'),
     path('index', views.IndexView.as_view(), name='index'),
     path('reenter', views.ReenterView.as_view(), name='reenter'),
     path('interim', views.interim, name='interim'),

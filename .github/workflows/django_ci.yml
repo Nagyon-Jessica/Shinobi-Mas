@@ -29,4 +29,34 @@ jobs:
     - name: Run Tests
       run: |
         python manage.py collectstatic
-        python manage.py test
+        python manage.py test homaster.tests.test_forms
+        python manage.py test homaster.tests.test_models
+        python manage.py test homaster.tests.test_views
+  integrationtest:
+    name: Integration Test
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 2
+    env:
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      SYSTEM_ENV: "TestWorkflow"
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setting up chrome driver
+      uses: nanasess/setup-chromedriver@v1
+      with:
+        chromedriver-version: '104.0.5112.79'
+    - name: Set up Python3.7
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.7
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install get-chrome-driver --upgrade
+        pip install -r requirements.txt
+    - name: Run Tests
+      run: |
+        python manage.py collectstatic
+        python manage.py test homaster.tests.test_screen
