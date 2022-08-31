@@ -1,32 +1,28 @@
+{% extends "homaster/base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <title>撤去完了</title>
-  <link rel="icon" type="image/png" href="{% static 'favicon.ico' %}">
-  <link rel="stylesheet" href="{% static 'assets/css/bootstrap.css' %}">
-  <link rel="stylesheet" href="{% static 'assets/css/shinobi-mas-common.css' %}">
-</head>
-<body>
-  <main class="main main-wrapper">
-    <p class="text-center">
-      ご利用ありがとうございました！またのセッションをお待ちしております！<br>
-      5秒後にトップページへ戻ります。
-    </p>
-  </main>
-  <footer class="footer absolute-bottom">
-    <div class="container">
-      <p class="text-muted text-center">
-        © 2021-2022 Shinobi-Mas<br>
-        お問い合わせはこちら→ shinobimas.master@gmail.com
-      </p>
-    </div>
-  </footer>
-</body>
+
+{% block title %}
+<title>撤去完了 - Shinobi-Mas</title>
+{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'assets/css/bootstrap.css' %}">
+<link rel="stylesheet" href="{% static 'assets/css/shinobi-mas-common.css' %}">
+{% endblock %}
+
+{% block content %}
+<main class="main main-wrapper">
+  <p class="text-center">
+    ご利用ありがとうございました！またのセッションをお待ちしております！<br>
+    5秒後にトップページへ戻ります。
+  </p>
+</main>
+{% endblock %}
+
+{% block script %}
 <script type="text/javascript">
   setTimeout(function(){
     window.location.href = "{% url 'homaster:index' %}";
   }, 5*1000);
 </script>
-</html>
+{% endblock %}

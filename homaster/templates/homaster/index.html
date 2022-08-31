@@ -1,43 +1,32 @@
+{% extends "homaster/base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  {% if env == 'prod' %}
-  <meta name="google-site-verification" content="qz6e3pmPrXwVVM2Oy7gfTzmF2dBw3ks5MMbKXH19_jo" />
-  <script async defer data-website-id="c2e6030c-a622-4118-81dc-e15ceb84de0d" src="https://shinobi-mas-analytics.herokuapp.com/umami.js"></script>
-  {% endif %}
-  <title>Shinobi-Mas</title>
-  <link rel="icon" type="image/png" href="{% static 'favicon.ico' %}">
+
+{% block title %}
+<title>Shinobi-Mas</title>
+{% endblock %}
+
+{% block head %}
   <link rel="stylesheet" href="{% static 'assets/css/bootstrap.css' %}">
   <link rel="stylesheet" href="{% static 'assets/css/shinobi-mas-common.css' %}">
-</head>
-<body>
-  <header class="header fixed-top release-note-link">
-    <a href="{% url 'homaster:release-notes' %}">リリースノート</a>
-  </header>
-  <main class="main main-wrapper">
-    <div class="index-app-name text-center">
-      <h1>Shinobi-Mas (γ)</h1>
-      <p>TRPGハンドアウト管理ツール</p>
-    </div>
-    <div class="index-app-form text-center">
-      <form method="post">{% csrf_token %}
-        {{ form.as_p }}
-        <input class="btn btn-primary" type="submit" value="ENGAWAを設える">
-      </form>
-    </div>
-    <div class="index-app-reenter-form text-center">
-      <a href="{% url 'homaster:reenter' %}">ENGAWAのURLを忘れてしまった場合はこちら</a>
-    </div>
-  </main>
-  <footer class="footer absolute-bottom">
-    <div class="container">
-      <p class="text-muted text-center">
-        © 2021-2022 Shinobi-Mas<br>
-        お問い合わせはこちら→ shinobimas.master@gmail.com
-      </p>
-    </div>
-  </footer>
-</body>
-</html>
+{% endblock %}
+
+{% block content %}
+<header class="header fixed-top release-note-link">
+  <a href="{% url 'homaster:release-notes' %}">リリースノート</a>
+</header>
+<main class="main main-wrapper">
+  <div class="index-app-name text-center">
+    <h1>Shinobi-Mas (γ)</h1>
+    <p>TRPGハンドアウト管理ツール</p>
+  </div>
+  <div class="index-app-form text-center">
+    <form method="post">{% csrf_token %}
+      {{ form.as_p }}
+      <input class="btn btn-primary" type="submit" value="ENGAWAを設える">
+    </form>
+  </div>
+  <div class="index-app-reenter-form text-center">
+    <a href="{% url 'homaster:reenter' %}">ENGAWAのURLを忘れてしまった場合はこちら</a>
+  </div>
+</main>
+{% endblock %}
