@@ -1,60 +1,53 @@
+{% extends "homaster/base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <title>リリースノート</title>
-  <link rel="icon" type="image/png" href="{% static 'favicon.ico' %}">
-  <link rel="stylesheet" href="{% static 'assets/css/bootstrap.css' %}">
-  <link rel="stylesheet" href="{% static 'assets/css/shinobi-mas-common.css' %}">
-</head>
-<body>
-  <main class="main main-wrapper">
-    <div class="return-buttom">
-      <a class="btn btn-secondary" href="{% url 'homaster:index' %}">戻る</a>
+
+{% block title %}
+<title>リリースノート - Shinobi-Mas</title>
+{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'assets/css/bootstrap.css' %}">
+<link rel="stylesheet" href="{% static 'assets/css/shinobi-mas-common.css' %}">
+{% endblock %}
+
+{% block content %}
+<main class="main main-wrapper">
+  <div class="return-buttom">
+    <a class="btn btn-secondary" href="{% url 'homaster:index' %}">戻る</a>
+  </div>
+  <div class="version-block">
+    <h2>
+      Ver. 0.2.1（γ）
+    </h2>
+    <div class="version-block-body">
+      Released on 2022/08/29
+      <ul>
+        <li>削除アイコンをマウスオーバーした際の挙動を修正</li>
+        <li>ENGAWA再入室ページのボタン配置を修正</li>
+      </ul>
     </div>
-    <div class="version-block">
-      <h2>
-        Ver. 0.2.1（γ）
-      </h2>
-      <div class="version-block-body">
-        Released on 2022/08/29
-        <ul>
-          <li>削除アイコンをマウスオーバーした際の挙動を修正</li>
-          <li>ENGAWA再入室ページのボタン配置を修正</li>
-        </ul>
-      </div>
-      <h2>
-        Ver. 0.2.0（γ）
-      </h2>
-      <div class="version-block-body">
-        Released on 2022/08/13
-        <ul>
-          <li>リリースノートを作成</li>
-          <li>閲覧権限管理テーブルを実装</li>
-          <li>招待URLの表示を集約化</li>
-        </ul>
-      </div>
+    <h2>
+      Ver. 0.2.0（γ）
+    </h2>
+    <div class="version-block-body">
+      Released on 2022/08/13
+      <ul>
+        <li>リリースノートを作成</li>
+        <li>閲覧権限管理テーブルを実装</li>
+        <li>招待URLの表示を集約化</li>
+      </ul>
     </div>
-    <div class="version-block">
-      <h2>
-        Ver. 0.1.0（β）
-      </h2>
-      <div class="version-block-body">
-        Released on 2021/09/30
-        <ul>
-          <li>Shinobi-Mas(β)をリリース</li>
-        </ul>
-      </div>
+  </div>
+  <div class="version-block">
+    <h2>
+      Ver. 0.1.0（β）
+    </h2>
+    <div class="version-block-body">
+      Released on 2021/09/30
+      <ul>
+        <li>Shinobi-Mas(β)をリリース</li>
+      </ul>
     </div>
-  </main>
-  <footer class="footer absolute-bottom">
-    <div class="container">
-      <p class="text-muted text-center">
-        © 2021-2022 Shinobi-Mas<br>
-        お問い合わせはこちら→ shinobimas.master@gmail.com
-      </p>
-    </div>
-  </footer>
-</body>
-</html>
+  </div>
+</main>
+{% endblock %}
