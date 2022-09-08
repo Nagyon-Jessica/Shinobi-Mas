@@ -123,6 +123,16 @@
     });
   });
 
+  // 「閲覧権限〜」がクリックされたらモーダルの幅を拡張
+  $(".auth-control").on('click', function() {
+    $(".modal-dialog").addClass("modal-lg");
+  });
+
+  // 閲覧権限モーダルを閉じるときにモーダル幅をリセット
+  $('#modal').on('hidden.bs.modal', function(event){
+    $(".modal-dialog").removeClass("modal-lg");
+  });
+
   // モーダル表示時の初期化処理
   $('#modal').on('shown.bs.modal', function(event){
     // コピーアイコンのtooltipを有効化
