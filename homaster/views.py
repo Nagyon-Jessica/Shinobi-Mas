@@ -442,7 +442,8 @@ class AuthControlView(BSModalFormView):
 
         engawa = self.request.user.engawa
         hos = Handout.objects.filter(engawa=engawa).order_by('type', 'id')
-        context['ho_names'] = list(map(lambda h: ho_names[str(h.id)], hos))
+        # NPC/HOの場合はハンドアウト種別+PC名をテーブルヘッダに表示する
+        context['ho_names'] = list(map(lambda h: ho_names[str(h.id)] if h.type == 1 else ho_names[str(h.id)] + "\n" + h.pc_name, hos))
         return context
 
     def get_form(self):
