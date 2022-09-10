@@ -823,7 +823,8 @@ class AuthControlViewTest(TestCase):
         NPC1(公開): PC1 裏○, PC2 裏x, PC3 裏○
         HO1(非公開): PC1 x, PC2 表○, PC3 裏○
 
-        PLの場合は1行のみ, チェックボックスが無効なことも確認。
+        PLの場合は1行のみ。 チェックボックスが無効なこと，
+        自分に対して非公開なハンドアウトが見えないことを確認
         """
         # ログイン
         c = self.client
@@ -851,13 +852,13 @@ class AuthControlViewTest(TestCase):
         auth_pl3_pc3 = AuthFactory(player=pl3, handout=pc3, auth_back=True)
 
         # NPC1とそれに紐づくPLのAuth
-        npc1 = HandoutFactory(engawa=gm.engawa, hidden=False, type=2)
+        npc1 = HandoutFactory(engawa=gm.engawa, hidden=False, type=2, pc_name='hoge')
         auth_pl1_npc1 = AuthFactory(player=pl1, handout=npc1, auth_back=True)
         auth_pl2_npc1 = AuthFactory(player=pl2, handout=npc1)
         auth_pl3_npc1 = AuthFactory(player=pl3, handout=npc1, auth_back=True)
 
         # HO1とそれに紐づくPLのAuth
-        ho1 = HandoutFactory(engawa=gm.engawa, hidden=True, type=3)
+        ho1 = HandoutFactory(engawa=gm.engawa, hidden=True, type=3, pc_name='fuga')
         auth_pl1_ho1 = AuthFactory(player=pl1, handout=ho1, auth_front=False)
         auth_pl2_ho1 = AuthFactory(player=pl2, handout=ho1)
         auth_pl3_ho1 = AuthFactory(player=pl3, handout=ho1, auth_back=True)
@@ -872,7 +873,7 @@ class AuthControlViewTest(TestCase):
         # context確認
         self.assertEqual(
             res1.context['ho_names'],
-            ['PC1', 'PC2', 'PC3', 'NPC1', 'HO1'])
+            ['PC1', 'PC2', 'PC3', 'NPC\nhoge', 'HO\nfuga'])
         
         choices_PC1 = [
             (str(auth_pl1_pc1.id), ''),
@@ -939,10 +940,31 @@ class AuthControlViewTest(TestCase):
         # モーダルを開く
         res3 = c.get('/auth-control')
         self.assertEqual(res3.status_code, 200)
+        # 表示ハンドアウトの確認（PC1からHO1は見えない）
+        self.assertListEqual(res3.context['ho_names'], ['PC1', 'PC2', 'PC3', 'NPC\nhoge'])
+
+        choices_PC1_PL1 = [
+            (str(auth_pl1_pc1.id), ''),
+            (str(auth_pl1_pc2.id), ''),
+            (str(auth_pl1_pc3.id), ''),
+            (str(auth_pl1_npc1.id), ''),
+        ]
+
+        choices_PC2_PL1 = [
+            (str(auth_pl2_pc1.id), ''),
+            (str(auth_pl2_pc2.id), ''),
+            (str(auth_pl2_pc3.id), ''),
+            (str(auth_pl2_npc1.id), ''),
+        ]
+
         # 選択肢，初期値，disabledの確認
-        self.assertEqual(
+        self.assertListEqual(
             res3.context['form'].fields['PC1_front'].choices,
-            choices_PC1)
+            choices_PC1_PL1)
+        # PC2にHO1の閲覧権限があっても，ログインユーザのPL1からは見えていないのでテーブルに表示されない
+        self.assertListEqual(
+            res3.context['form'].fields['PC2_front'].choices,
+            choices_PC2_PL1)
         self.assertEqual(
             res3.context['form'].fields['PC1_front'].initial,
             [auth_pl1_pc1.id, auth_pl1_pc2.id, auth_pl1_pc3.id, auth_pl1_npc1.id])
@@ -951,6 +973,17 @@ class AuthControlViewTest(TestCase):
             [auth_pl1_pc1.id, auth_pl1_pc2.id, auth_pl1_npc1.id])
         self.assertTrue(res3.context['form'].fields['PC1_front'].disabled)
         self.assertTrue(res3.context['form'].fields['PC1_back'].disabled)
+
+        # PL2テスト（カラム数だけ確認）
+        url_pc2 = f'/{gm.engawa.uuid}?p_code={pc2.p_code}'
+        # PC1でログイン
+        res4 = c.get(url_pc2)
+        self.assertRedirects(res4, '/engawa')
+        # モーダルを開く
+        res5 = c.get('/auth-control')
+        self.assertEqual(res5.status_code, 200)
+        # 表示ハンドアウトの確認
+        self.assertListEqual(res5.context['ho_names'], ['PC1', 'PC2', 'PC3', 'NPC\nhoge', 'HO\nfuga'])
 
     def test_post_ok(self):
         """
