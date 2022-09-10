@@ -366,9 +366,9 @@ class EngawaViewTest(TestCase):
         self.assertEqual(res.context['role_name'], 'GM')
         self.assertEqual(c.session['role_name'], 'GM')
         self.assertEqual(list(res.context['object_list'].all()), [pc, npc, ho])
-        self.assertEqual(c.session['ho_names'], {str(npc.id): 'NPC1', str(ho.id): 'HO1', str(pc.id): 'PC1'})
+        self.assertEqual(c.session['ho_names'], {str(npc.id): 'NPC', str(ho.id): 'HO', str(pc.id): 'PC1'})
         ho_names = list(map(lambda obj: obj.ho_name, res.context['object_list']))
-        self.assertEqual(ho_names, ['PC1', 'NPC1', 'HO1'])
+        self.assertEqual(ho_names, ['PC1', 'NPC', 'HO'])
 
     def test_get_ok_pl(self):
         """
@@ -404,9 +404,9 @@ class EngawaViewTest(TestCase):
         self.assertEqual(res.context['object_list'], [pc1, pc2, npc2, ho])
         self.assertEqual(
             c.session['ho_names'],
-            {str(npc1.id): 'NPC1', str(npc2.id): 'NPC2', str(ho.id): 'HO1', str(pc1.id): 'PC1', str(pc2.id): 'PC2'})
+            {str(npc1.id): 'NPC', str(npc2.id): 'NPC', str(ho.id): 'HO', str(pc1.id): 'PC1', str(pc2.id): 'PC2'})
         ho_names = list(map(lambda obj: obj.ho_name, res.context['object_list']))
-        self.assertEqual(ho_names, ['PC1', 'PC2', 'NPC2', 'HO1'])
+        self.assertEqual(ho_names, ['PC1', 'PC2', 'NPC', 'HO'])
 
 class CreateHandoutViewTest(TestCase):
     def test_get_ok(self):
