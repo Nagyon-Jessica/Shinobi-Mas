@@ -47,3 +47,11 @@
 .fa-trash-alt {
   cursor: pointer;
 }
+
+.ho-list a {
+  color: black;
+}
+
+.ho-list a:hover {
+  color: rgb(35, 171, 255);
+}
