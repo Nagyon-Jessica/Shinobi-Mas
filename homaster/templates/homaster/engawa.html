@@ -50,7 +50,11 @@
           <table class="ho-table row">
             <tr class="ho-table-tanzaku">
               <td class="ho-table-id">
+                {% if player.is_gm %}
+                <a href="{% url 'homaster:update' handout.id %}">{{ handout.ho_name }}</a>
+                {% else %}
                 <a href="{% url 'homaster:detail' handout.id %}">{{ handout.ho_name }}</a>
+                {% endif %}
               </td>
               <td class="ho-table-name-type">PC名:</td>
               <td class="ho-table-name">{{ handout.pc_name|default_if_none:"（未指定）" }}</td>
