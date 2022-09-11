@@ -241,9 +241,9 @@ class EngawaView(LoginRequiredCustomMixin, ListView):
         if context['object_list']:
             ho_names = OrderedDict()
             for t, hos in groupby(context['object_list'], key=lambda x: x.type):
-                type = HANDOUT_TYPE_DICT[str(t)]
+                ho_type = HANDOUT_TYPE_DICT[str(t)]
                 for i, ho in enumerate(hos):
-                    ho_names[str(ho.id)] = (type + str(i + 1))
+                    ho_names[str(ho.id)] = (ho_type + str(i + 1)) if ho_type == "PC" else ho_type
             self.request.session['ho_names'] = ho_names
             for i, (_, ho_name) in enumerate(ho_names.items()):
                 context['object_list'][i].ho_name = ho_name
@@ -440,9 +440,17 @@ class AuthControlView(BSModalFormView):
         # ハンドアウトIDとハンドアウト名の対応表
         ho_names = self.request.session['ho_names']
 
-        engawa = self.request.user.engawa
-        hos = Handout.objects.filter(engawa=engawa).order_by('type', 'id')
-        context['ho_names'] = list(map(lambda h: ho_names[str(h.id)], hos))
+        user = self.request.user
+        engawa = user.engawa
+
+        # ログインユーザがPLの場合，表の閲覧権限があるハンドアウトのみ表示する
+        if user.is_gm:
+            hos = Handout.objects.filter(engawa=engawa).order_by('type', 'id')
+        else:
+            hos = Handout.objects.filter(engawa=engawa, auth__player=user, auth__auth_front=True).order_by('type', 'id')
+
+        # NPC/HOの場合はハンドアウト種別+PC名をテーブルヘッダに表示する
+        context['ho_names'] = list(map(lambda h: ho_names[str(h.id)] if h.type == 1 else ho_names[str(h.id)] + "\n" + h.pc_name, hos))
         return context
 
     def get_form(self):
@@ -455,10 +463,20 @@ class AuthControlView(BSModalFormView):
         engawa = user.engawa
         players = Player.objects.filter(engawa=engawa, role=0).order_by('id')
 
+        # ログインユーザーがPLの場合は，PL画面に表示可能なハンドアウトの一覧を定義
+        if not user.is_gm:
+            displayable_hos = Handout.objects.filter(engawa=engawa, auth__player=user, auth__auth_front=True).order_by('type', 'id')
+            displayable_hoids = list(map(lambda h: h.id, displayable_hos))
+
         for pl in players:
             # PLのHO名
             ho_name = ho_names[str(pl.handout.id)]
-            auths = Auth.objects.filter(player=pl).order_by('handout__type', 'handout__id')
+            if user.is_gm:
+                auths = Auth.objects.filter(player=pl).order_by('handout__type', 'handout__id')
+            else:
+                # ログインユーザーがPLの場合は，ログインユーザーに閲覧権限のないハンドアウトの権限は除外
+                auths = Auth.objects.filter(player=pl, handout__in=displayable_hoids).order_by('handout__type', 'handout__id')
+
             print(list(map(lambda a: a.handout.id, auths)))
             # フィールドを動的に生成
             # PL画面の場合チェックボックスをdisabledにする
