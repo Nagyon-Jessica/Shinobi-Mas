@@ -26,24 +26,33 @@
           {% csrf_token %}
           <table class="ho-detail-table container">
             <tr class="row">
-              <td class="ho-detail-table-col col-1">PC名 </td>
+              <td class="ho-detail-table-col col-1">
+                <label for="id_pc_name">{{ form.pc_name.label }}</label>
+              </td>
               <td class="ho-detail-table-charf col">{{ form.pc_name }}</td>
               <td>
                 {% if ho_type != "PC" %}
-                {{ form.hidden }} 非公開（シナリオ開始時には表を含め公開されません）
+                {{ form.hidden }}
+                <label for="id_hidden">{{ form.hidden.label }}</label>
                 {% endif %}
               </td>
             </tr>
             <tr class="row">
-              <td class="ho-detail-table-col col-1">PL名 </td>
+              <td class="ho-detail-table-col col-1">
+                <label for="id_pl_name">{{ form.pl_name.label }}</label>
+              </td>
               <td class="col">{{ form.pl_name }}</td>
             </tr>
             <tr class="ho-detail-table-textf row">
-              <td class="ho-detail-table-col col-1">使命(表)</td>
+              <td class="ho-detail-table-col col-1">
+                <label for="id_front">{{ form.front.label }}</label>
+              </td>
               <td class="col">{{ form.front }}</td>
             </tr>
             <tr class="ho-detail-table-textf row">
-              <td class="ho-detail-table-col col-1">秘密(裏)</td>
+              <td class="ho-detail-table-col col-1">
+                <label for="id_back">{{ form.back.label }}</label>
+              </td>
               <td class="col">{{ form.back }}</td>
             </tr>
           </table>
