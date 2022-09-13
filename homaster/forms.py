@@ -39,6 +39,13 @@ class HandoutForm(forms.ModelForm):
     class Meta:
         model = Handout
         fields = ('type', 'pc_name', 'pl_name', 'front', 'back')
+        labels = {
+            'type': "ハンドアウト種別",
+            'pc_name': 'PC名',
+            'pl_name': 'PL名',
+            'front': '使命(表)',
+            'back': '秘密(裏)'
+        }
 
 class AuthControlForm(BSModalForm):
     def clean(self):
