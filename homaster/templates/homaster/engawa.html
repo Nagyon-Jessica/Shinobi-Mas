@@ -47,34 +47,31 @@
       <div class="list-group ho-list">
       {% for handout in object_list %}
         {% if player.is_gm %}
-        <a href="{% url 'homaster:update' handout.id %}" class="list-group-item" hoid="{{ handout.id }}" honame="{{ handout.ho_name }}">
+        <a href="{% url 'homaster:update' handout.id %}" class="list-group-item pr-0" hoid="{{ handout.id }}" honame="{{ handout.ho_name }}">
         {% else %}
-        <a href="{% url 'homaster:detail' handout.id %}" class="list-group-item" hoid="{{ handout.id }}" honame="{{ handout.ho_name }}">
+        <a href="{% url 'homaster:detail' handout.id %}" class="list-group-item pr-0" hoid="{{ handout.id }}" honame="{{ handout.ho_name }}">
         {% endif %}
-          <table class="ho-table row">
-            <tr class="ho-table-tanzaku">
-              <td class="ho-table-id">
-                {{ handout.ho_name }}
-              </td>
-              <td class="ho-table-name-type">PC名:</td>
-              <td class="ho-table-name">{{ handout.pc_name|default_if_none:"（未指定）" }}</td>
-              <td class="ho-table-front" rowspan="2">{{ handout.front }}</td>
-            </tr>
-            <tr class="ho-table-tanzaku">
-              <td class="ho-table-edit">
-                {% if player.is_gm %}
-                <a href="{% url 'homaster:update' handout.id %}" class="text-dark" title="編集">
-                  <i class="far fa-edit"></i>
-                </a>
-                <span class="delete text-dark" title="削除">
-                  <i class="far fa-trash-alt"></i>
-                </span>
-                {% endif %}
-              </td>
-              <td class="ho-table-name-type">PL名:</td>
-              <td class="ho-table-name">{{ handout.pl_name|default_if_none:"（未指定）" }}</td>
-            </tr>
-          </table>
+          <div class="d-flex align-items-start">
+            <div class="ho-table-id align-self-center mr-3">
+              {{ handout.ho_name }}
+            </div>
+            <div class="mr-3 d-flex align-items-start flex-column align-self-center">
+              <div class="d-flex align-items-start">
+                <div class="ho-table-name-type">PC名:</div>
+                <div class="ho-table-name">{{ handout.pc_name|default_if_none:"（未指定）" }}</div>
+              </div>
+              <div class="d-flex align-items-start">
+                <div class="ho-table-name-type">PL名:</div>
+                <div class="ho-table-name">{{ handout.pl_name|default_if_none:"（未指定）" }}</div>
+              </div>
+            </div>
+            <div class="ho-table-front align-self-center flex-grow-1 mr-3" rowspan="2">{{ handout.front }}</div>
+            {% if player.is_gm %}
+            <div class="delete align-self-stretch d-flex align-items-start">
+              <i class="far fa-trash-alt mx-auto align-self-center" title="削除"></i>
+            </div>
+            {% endif %}
+          </div>
         </a>
       {% endfor %}
       </div>
@@ -111,13 +108,20 @@
     });
 
     $(".delete").each(function(index, element){
-      var hoid = $(element).closest('ul').attr("hoid")
-      var honame = $(element).closest('ul').attr("honame")
+      var hoid = $(element).closest('a').attr("hoid")
+      var honame = $(element).closest('a').attr("honame")
       $(element).modalForm({
         formURL: "{% url 'homaster:delete-handout' %}?id=" + hoid + "&name=" + honame
       })
     });
   });
+
+  // 削除アイコンの治外法権化
+  $('.delete').on('click', function(e){
+    //伝播をストップ
+    e.stopPropagation();
+    e.preventDefault();
+  })
 
   // 「閲覧権限〜」がクリックされたらモーダルの幅を拡張
   $(".auth-control").on('click', function() {
