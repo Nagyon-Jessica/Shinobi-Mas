@@ -1,0 +1,30 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  {% if env == 'prod' %}
+  <meta name="google-site-verification" content="qz6e3pmPrXwVVM2Oy7gfTzmF2dBw3ks5MMbKXH19_jo" />
+  <script async defer data-website-id="c2e6030c-a622-4118-81dc-e15ceb84de0d" src="https://shinobi-mas-analytics.herokuapp.com/umami.js"></script>
+  {% endif %}
+  {% block title %}
+  {% endblock %}
+  <link rel="icon" type="image/png" href="{% static 'favicon.ico' %}">
+  {% block head %}
+  {% endblock %}
+</head>
+<body>
+  {% block content %}
+  {% endblock %}
+  <footer class="footer absolute-bottom">
+    <div class="container">
+      <p class="text-muted text-center">
+        © 2021-2022 Shinobi-Mas<br>
+        お問い合わせはこちら→ shinobimas.master@gmail.com
+      </p>
+    </div>
+  </footer>
+</body>
+{% block script %}
+{% endblock %}
+</html>

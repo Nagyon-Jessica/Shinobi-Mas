@@ -1,33 +1,23 @@
+{% extends "homaster/base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <title>ENGAWA再訪</title>
-  <link rel="icon" type="image/png" href="{% static 'favicon.ico' %}">
-  <link rel="stylesheet" href="{% static 'assets/css/bootstrap.css' %}">
-  <link rel="stylesheet" href="{% static 'assets/css/shinobi-mas-common.css' %}">
-</head>
-<body>
-  <main class="main main-wrapper">
-    <div class="text-center">
-      <form method="post">{% csrf_token %}
-        {{ form.as_p }}
-        <input type="submit" class="btn btn-primary" value="メールを送信する">
-        <a class="btn btn-secondary" href="{% url 'homaster:index' %}">戻る</a>
-      </form>
-    </div>
-    <!-- <div class="return-buttom">
+
+{% block title %}
+<title>ENGAWA再訪 - Shinobi-Mas</title>
+{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'assets/css/bootstrap.css' %}">
+<link rel="stylesheet" href="{% static 'assets/css/shinobi-mas-common.css' %}">
+{% endblock %}
+
+{% block content %}
+<main class="main main-wrapper">
+  <div class="text-center">
+    <form method="post">{% csrf_token %}
+      {{ form.as_p }}
+      <input type="submit" class="btn btn-primary" value="メールを送信する">
       <a class="btn btn-secondary" href="{% url 'homaster:index' %}">戻る</a>
-    </div> -->
-  </main>
-  <footer class="footer absolute-bottom">
-    <div class="container">
-      <p class="text-muted text-center">
-        © 2021-2022 Shinobi-Mas<br>
-        お問い合わせはこちら→ shinobimas.master@gmail.com
-      </p>
-    </div>
-  </footer>
-</body>
-</html>
+    </form>
+  </div>
+</main>
+{% endblock %}
