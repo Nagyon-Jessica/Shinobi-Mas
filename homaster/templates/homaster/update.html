@@ -1,73 +1,67 @@
+{% extends "homaster/base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="utf-8">
-  <title>ハンドアウト編集 - Shinobi-Mas</title>
-  <link rel="icon" type="image/png" href="{% static 'favicon.ico' %}">
-  <link rel="stylesheet" href="{% static 'assets/css/bootstrap.css' %}">
-  <link rel="stylesheet" href="{% static 'assets/css/shinobi-mas-common.css' %}">
-  <link rel="stylesheet" href="{% static 'assets/css/shinobi-mas-ho-detail.css' %}">
-  <script src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
-  <script src="{% static 'assets/js/bootstrap.js' %}"></script>
-  <script src="{% static 'js/jquery.bootstrap.modal.forms.js' %}"></script>
-</head>
-<body>
-  <header class="header fixed-top your-auth">
-    あなたは<strong>{{ role_name }}</strong>です。
-  </header>
-  <main class="main main-wrapper">
-    <div class="ho-detail-form">
-      <div class="ho-detail-type">
-        ハンドアウト種別: {{ ho_type }}
-      </div>
-      <div>
-        <form action="" method="POST">
-          {% csrf_token %}
-          <table class="ho-detail-table container">
-            <tr class="row">
-              <td class="ho-detail-table-col col-1">
-                <label for="id_pc_name">{{ form.pc_name.label }}</label>
-              </td>
-              <td class="ho-detail-table-charf col">{{ form.pc_name }}</td>
-              <td>
-                {% if ho_type != "PC" %}
-                {{ form.hidden }}
-                <label for="id_hidden">{{ form.hidden.label }}</label>
-                {% endif %}
-              </td>
-            </tr>
-            <tr class="row">
-              <td class="ho-detail-table-col col-1">
-                <label for="id_pl_name">{{ form.pl_name.label }}</label>
-              </td>
-              <td class="col">{{ form.pl_name }}</td>
-            </tr>
-            <tr class="ho-detail-table-textf row">
-              <td class="ho-detail-table-col col-1">
-                <label for="id_front">{{ form.front.label }}</label>
-              </td>
-              <td class="col">{{ form.front }}</td>
-            </tr>
-            <tr class="ho-detail-table-textf row">
-              <td class="ho-detail-table-col col-1">
-                <label for="id_back">{{ form.back.label }}</label>
-              </td>
-              <td class="col">{{ form.back }}</td>
-            </tr>
-          </table>
-          <button type="submit" class="btn btn-primary">保存</button>
-          <a class="btn btn-secondary" href="{{ request.META.HTTP_REFERER }}">戻る</a>
-        </form>
-      </div>
+
+{% block title %}
+<title>ハンドアウト編集 - Shinobi-Mas</title>
+{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'assets/css/bootstrap.css' %}">
+<link rel="stylesheet" href="{% static 'assets/css/shinobi-mas-common.css' %}">
+<link rel="stylesheet" href="{% static 'assets/css/shinobi-mas-ho-detail.css' %}">
+<script src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
+<script src="{% static 'assets/js/bootstrap.js' %}"></script>
+<script src="{% static 'js/jquery.bootstrap.modal.forms.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<header class="header fixed-top your-auth">
+  あなたは<strong>{{ role_name }}</strong>です。
+</header>
+<main class="main main-wrapper">
+  <div class="ho-detail-form">
+    <div class="ho-detail-type">
+      ハンドアウト種別: {{ ho_type }}
     </div>
-  </main>
-  <footer class="footer absolute-bottom">
-    <div class="container">
-      <p class="text-muted text-center">
-        © 2021-2022 Shinobi-Mas<br>
-        お問い合わせはこちら→ shinobimas.master@gmail.com
-      </p>
+    <div>
+      <form action="" method="POST">
+        {% csrf_token %}
+        <table class="ho-detail-table container">
+          <tr class="row">
+            <td class="ho-detail-table-col col-1">
+              <label for="id_pc_name">{{ form.pc_name.label }}</label>
+            </td>
+            <td class="ho-detail-table-charf col">{{ form.pc_name }}</td>
+            <td>
+              {% if ho_type != "PC" %}
+              {{ form.hidden }}
+              <label for="id_hidden">{{ form.hidden.label }}</label>
+              {% endif %}
+            </td>
+          </tr>
+          <tr class="row">
+            <td class="ho-detail-table-col col-1">
+              <label for="id_pl_name">{{ form.pl_name.label }}</label>
+            </td>
+            <td class="col">{{ form.pl_name }}</td>
+          </tr>
+          <tr class="ho-detail-table-textf row">
+            <td class="ho-detail-table-col col-1">
+              <label for="id_front">{{ form.front.label }}</label>
+            </td>
+            <td class="col">{{ form.front }}</td>
+          </tr>
+          <tr class="ho-detail-table-textf row">
+            <td class="ho-detail-table-col col-1">
+              <label for="id_back">{{ form.back.label }}</label>
+            </td>
+            <td class="col">{{ form.back }}</td>
+          </tr>
+        </table>
+        <button type="submit" class="btn btn-primary">保存</button>
+        <a class="btn btn-secondary" href="{{ request.META.HTTP_REFERER }}">戻る</a>
+      </form>
     </div>
-  </footer>
-</body>
+  </div>
+</main>
+{% endblock %}
